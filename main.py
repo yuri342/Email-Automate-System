@@ -535,9 +535,11 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     print(f"{'='*50}")
     
     # Limpar o nome do líder para busca de email
-    if lider is not None or lider is not "":
+    if lider is not None and lider != "":
         liderlimpo = " ".join(lider.split()[1:]) + ", " + lider.split()[0]
-    
+    else:
+        liderlimpo = "Líder Não Informado"
+
     # Buscar email do líder
     email = buscar_email_na_gal(lider)
     
