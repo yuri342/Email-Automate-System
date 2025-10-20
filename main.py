@@ -403,7 +403,7 @@ def subtrair_horarios(horario1, horario2):
 funcionariosEnviados = []
 lideresEnviados = []
 funcionarios = []
-jsonArq = pathlib.Path(r"projetos09.json")
+jsonArq = pathlib.Path(r"projetos10.json")
 
 
 criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "aracaju-Enviados")
@@ -502,9 +502,6 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
 
             ativo = pathlib.Path(r"lideranca.json")
             lider = buscar_gerente_viaAtivo(nome, ativo)
-            liderpart = lider.split()
-            liderlimpo = " ".join(lider.split())
-            email = buscar_email_na_gal(lider)
 
             funcionarios.append(montar_funcionario(
                 lider=lider,
@@ -538,7 +535,8 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     print(f"{'='*50}")
     
     # Limpar o nome do líder para busca de email
-    liderlimpo = " ".join(lider.split()[1:]) + ", " + lider.split()[0]
+    if lider is not None or lider is not "":
+        liderlimpo = " ".join(lider.split()[1:]) + ", " + lider.split()[0]
     
     # Buscar email do líder
     email = buscar_email_na_gal(lider)
@@ -559,7 +557,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
             assunto="Relatório de Horas Extras",
             corpo=bodye,
             cc=["maicon.borba@tkelevator.com", "bernardo.cunha@tkelevator.com"],
-            enviar_automatico=False
+            enviar_automatico=True
         )
         sucesso = True
         print(f"✅ Email aberto para envio manual: {lider}")
