@@ -520,44 +520,90 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                 ops=ops
             ))
 
+# Primeiro, agrupa os funcionários por liderança
+funcionarios_por_lider = {}
 for func in funcionarios:
     lider = func['lider']
-    print("Processando email para liderança - " + lider +"\n"+"-"*30)
-    bodye = construir_email_body_multiplos_funcionarios(periodo=f"11/{empregados["mes"]}/2025 á {hoje}",funcionarios=funcionarios)
-                        
+    if lider not in funcionarios_por_lider:
+        funcionarios_por_lider[lider] = []
+    funcionarios_por_lider[lider].append(func)
+
+# Agora processa cada liderança separadamente
+for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
+    print(f"\n{'='*50}")
+    print(f"{funcionarios_deste_lider}")
+    print(f"\n{'='*50}")
+    print(f"Processando email para liderança: {lider}")
+    print(f"Total de funcionários: {len(funcionarios_deste_lider)}")
+    print(f"{'='*50}")
+    
+    # Limpar o nome do líder para busca de email
+    liderlimpo = " ".join(lider.split()[1:]) + ", " + lider.split()[0]
+    
+    # Buscar email do líder
+    email = buscar_email_na_gal(lider)
+    
+    # Construir corpo do email apenas com os funcionários desta liderança
+    bodye = construir_email_body_multiplos_funcionarios(
+        periodo=f"13/10 A 17/10",
+        funcionarios=funcionarios_deste_lider
+    )
+    
+    sucesso = False
+    
     try:
         # Primeiro tenta enviar usando o nome
+        print(f"📧 Tentando enviar para: {lider}")
         enviar_email_outlook(
-            destinatario=[liderlimpo],
+            destinatario=lider,
             assunto="Relatório de Horas Extras",
             corpo=bodye,
             cc=["maicon.borba@tkelevator.com", "bernardo.cunha@tkelevator.com"],
             enviar_automatico=False
         )
         sucesso = True
+        print(f"✅ Email aberto para envio manual: {lider}")
+        
     except Exception as e:
-        print(f"Falha ao enviar para {lider} pelo nome: {e}")
+        print(f"❌ Falha ao enviar para {lider} pelo nome: {e}")
         sucesso = False
+    
     # Se falhar e tiver e-mail, tenta novamente usando o e-mail
     if not sucesso and email:
         try:
+            print(f"📧 Tentando enviar para email: {email}")
             enviar_email_outlook(
-                destinatario=[email],
+                destinatario=email,
                 assunto="Relatório de Horas Extras",
                 corpo=bodye,
                 cc=["maicon.borba@tkelevator.com", "bernardo.cunha@tkelevator.com"],
                 enviar_automatico=True
             )
             sucesso = True
-            print(f"E-mail enviado usando endereço direto: {email}")
+            print(f"✅ E-mail enviado com sucesso para: {email}")
+            
         except Exception as e2:
-            print(f"Falha ao enviar para {email}: {e2}")
-    # Se algum envio funcionou, registra
+            print(f"❌ Falha ao enviar para {email}: {e2}")
+            sucesso = False
+    
+    # Se algum envio funcionou, registra na planilha
+    if sucesso:
+        # Registrar todos os funcionários desta liderança
+        for func in funcionarios_deste_lider:
+            nome_funcionario = func['nome_colaborador']
+            funcionariosEnviados.append(nome_funcionario)
+            lideresEnviados.append(lider)
+            adicionar_registro_planilha(nome_funcionario, lider, "13a17-outubro-Enviados.xlsx")
+        
+        print(f"📊 Registrados {len(funcionarios_deste_lider)} funcionários da liderança {lider}")
+    else:
+        print(f"⚠️  Nenhum email enviado para liderança: {lider}")
 
-    if sucesso == True :
-        funcionariosEnviados.append(nome)
-        lideresEnviados.append(lider)
-        adicionar_registro_planilha(nome, lider, "13a17-outubro-Enviados.xlsx")
+print(f"\n{'='*50}")
+print("RESUMO DO PROCESSAMENTO:")
+print(f"Total de lideranças processadas: {len(funcionarios_por_lider)}")
+print(f"Total de funcionários enviados: {len(funcionariosEnviados)}")
+print(f"{'='*50}")
     
 
 
