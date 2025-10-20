@@ -402,6 +402,7 @@ def subtrair_horarios(horario1, horario2):
 
 funcionariosEnviados = []
 lideresEnviados = []
+funcionarios = []
 jsonArq = pathlib.Path(r"projetos09.json")
 
 
@@ -468,7 +469,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                 elif sit["codigo"] == "DSR":
                     continue
 
-        if total_Extras >= 8:
+        if total_Extras >= 9: 
           ops.append(1)
 
         if cna == True :
@@ -484,10 +485,6 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
             from datetime import date, timedelta
             hoje = "10/10/2025"
             amanha = date.today() + timedelta(days=1)
-
-            
-
-            bodye = construir_email_body_multiplos_funcionarios(periodo=f"11/{empregados["mes"]}/2025 á {hoje}",)
 
             # bodye = construir_email_body(
             #     nome_colaborador=nome,
@@ -508,43 +505,60 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
             liderpart = lider.split()
             liderlimpo = " ".join(lider.split())
             email = buscar_email_na_gal(lider)
-            try:
-                # Primeiro tenta enviar usando o nome
-                enviar_email_outlook(
-                    destinatario=[liderlimpo],
-                    assunto="Relatório de Horas Extras",
-                    corpo=bodye,
-                    cc=["maicon.borba@tkelevator.com", "bernardo.cunha@tkelevator.com"],
-                    enviar_automatico=False
-                )
-                sucesso = True
-            except Exception as e:
-                print(f"Falha ao enviar para {lider} pelo nome: {e}")
-                sucesso = False
 
-            # Se falhar e tiver e-mail, tenta novamente usando o e-mail
-            if not sucesso and email:
-                try:
-                    enviar_email_outlook(
-                        destinatario=[email],
-                        assunto="Relatório de Horas Extras",
-                        corpo=bodye,
-                        cc=["maicon.borba@tkelevator.com", "bernardo.cunha@tkelevator.com"],
-                        enviar_automatico=True
-                    )
-                    sucesso = True
-                    print(f"E-mail enviado usando endereço direto: {email}")
-                except Exception as e2:
-                    print(f"Falha ao enviar para {email}: {e2}")
+            funcionarios.append(montar_funcionario(
+                lider=lider,
+                nome_colaborador=nome,
+                HorasPendentes=str(total_Extras),
+                Fechamento_folha="10/11/2025",
+                data_inicio=datas_interjor[0][0]if 3 in ops else "",
+                data_final=datas_interjor[-1][-4]if 3 in ops else "",
+                ultimo_Ponto=datas_interjor[0][2][-1]if 3 in ops else "",
+                primeiro_ponto_outro=datas_interjor[-1][5][0]if 3 in ops else "",
+                interjornadas=datas_interjor if 3 in ops else None,
+                horas_extras_nao_autorizadas=datas_Extras_nAut,
+                ops=ops
+            ))
 
-            # Se algum envio funcionou, registra
-    if sucesso:
+for func in funcionarios:
+    lider = func['lider']
+    print("Processando email para liderança - " + lider +"\n"+"-"*30)
+    bodye = construir_email_body_multiplos_funcionarios(periodo=f"11/{empregados["mes"]}/2025 á {hoje}",funcionarios=funcionarios)
+                        
+    try:
+        # Primeiro tenta enviar usando o nome
+        enviar_email_outlook(
+            destinatario=[liderlimpo],
+            assunto="Relatório de Horas Extras",
+            corpo=bodye,
+            cc=["maicon.borba@tkelevator.com", "bernardo.cunha@tkelevator.com"],
+            enviar_automatico=False
+        )
+        sucesso = True
+    except Exception as e:
+        print(f"Falha ao enviar para {lider} pelo nome: {e}")
+        sucesso = False
+    # Se falhar e tiver e-mail, tenta novamente usando o e-mail
+    if not sucesso and email:
+        try:
+            enviar_email_outlook(
+                destinatario=[email],
+                assunto="Relatório de Horas Extras",
+                corpo=bodye,
+                cc=["maicon.borba@tkelevator.com", "bernardo.cunha@tkelevator.com"],
+                enviar_automatico=True
+            )
+            sucesso = True
+            print(f"E-mail enviado usando endereço direto: {email}")
+        except Exception as e2:
+            print(f"Falha ao enviar para {email}: {e2}")
+    # Se algum envio funcionou, registra
+
+    if sucesso == True :
         funcionariosEnviados.append(nome)
         lideresEnviados.append(lider)
-        adicionar_registro_planilha(nome, lider, "aracaju-Enviados.xlsx")
+        adicionar_registro_planilha(nome, lider, "13a17-outubro-Enviados.xlsx")
     
-                        
-
 
 
 

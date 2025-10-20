@@ -1,4 +1,7 @@
 Reports/
 model.html
 __pycache__/
-.json
+*.json
+.vscode
+*.xlsx
+*.xlx
