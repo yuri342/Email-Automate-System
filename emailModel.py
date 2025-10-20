@@ -343,14 +343,6 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
             <p>• Casos especiais devem ser compensados conforme acordo ou suas devidas rotinas e OS's</p>
             <p>• Próxima verificação no final do fechamento da proxima folha</p>
             <p>• Está apuração sera verificada para auditar das ordems requisitadas</p>
-            <div style="text-align: center; padding: 20px; background: #f8f9fa;">
-                <p style="margin: 0 0 15px 0;">Problemas de visualização?</p>
-                <a href="https://seu-sistema.com/relatorio/{id}" 
-                   style="background: #005b96; color: white; padding: 10px 20px; 
-                          text-decoration: none; border-radius: 4px; font-weight: bold;">
-                   📊 Ver relatório online
-                </a>
-            </div>
         </div>
 
         <!-- Rodapé Corporativo TKE -->
