@@ -327,9 +327,9 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
         
         <p>
             Em continuidade às análises de ponto dos colaboradores, informo que, neste mês,
-            iniciamos uma avaliação mais criteriosa, com o objetivo de apoiar as lideranças
-            no acompanhamento da jornada de seus empregados. Verificamos, no período de <b>{periodo}</b>, a ocorrência
-            das seguintes irregularidades dos seguintes empregados:
+            iniciamos uma avaliação mais criteriosa com o objetivo de apoiar as lideranças
+            no acompanhamento da jornada de seus colabaoradores. Verificamos, no período de <b>{periodo}</b>, a ocorrência
+            das irregularidades dos seguintes colaboradores:
         </p>
 
         <!-- CONTAINER COM TODOS OS FUNCIONÁRIOS -->
