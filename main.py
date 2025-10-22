@@ -21,6 +21,24 @@ global cna
 global funcionariosEnviados
 global lideresEnviados
 
+
+set_601_688 = set(["601", "602", "603", "604", "605", "606", "607", "608", "609", "610", "611", "612", "613",
+    "614", "615", "616", "617", "618", "619", "620", "621", "622", "623", "624", "625", "626",
+    "627", "628", "629", "630", "631", "632", "633", "634", "635", "636", "651", "652", "653",
+    "654", "655", "656", "657", "658", "659", "660", "661", "662", "663", "664", "665", "666",
+    "667", "668", "669", "670", "671", "672", "673", "674", "675", "676", "677", "678", "679",
+    "680", "681", "682", "683", "684", "685", "686", "687", "688"])
+
+set_301_336 = set(["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311",
+    "312", "313", "314", "315", "316", "317", "318", "319", "320", "321", "322", "323", "324",
+    "325", "326", "327", "328", "329", "330", "331", "332", "333", "334", "335", "336"])
+
+set_351_390 = set(["351",
+    "352", "353", "354", "355", "356", "357", "358", "359", "360", "361", "362", "363", "364",
+    "365", "366", "367", "368", "369", "370", "371", "372", "373", "374", "375", "376", "377",
+    "378", "379", "380", "381", "382", "383", "384", "385", "386", "387", "388", "389", "390"])
+
+
 def montar_funcionario(lider, nome_colaborador, HorasPendentes="", Fechamento_folha="", 
                       data_inicio="", data_final="", ultimo_Ponto="", 
                       primeiro_ponto_outro="", interjornadas=None, 
@@ -406,7 +424,7 @@ funcionarios = []
 jsonArq = pathlib.Path(r"projetos10.json")
 
 
-criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "Enviados-5004")
+criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "Enviados-TESTE")
 with open(jsonArq, 'r', encoding='utf-8') as arquivo:
     empregados = json.load(arquivo)
     for empregado in empregados["Empregados"]:
@@ -433,14 +451,14 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                 ultima_hoje = marcas[-1]
                 primeira_amanha = dia_seguinte["marcacoes"][0]
                 calc = calcular_intervalo_datetime(ultima_hoje, primeira_amanha)
-                if 0 < calc["total_minutos"] <= 660 and diferenca_dias(dia_seguinte["data"], dia["data"]) >= 1: #11 horas em minutos
+                if 0 < calc["total_minutos"] < 660 and (diferenca_dias(dia_seguinte["data"], dia["data"]) <= 1): #11 horas em minutos
                     calc = calcular_intervalo_datetime(ultima_hoje, primeira_amanha)
                     datas_interjor.append([dia["data"], dia["dia_semana"], dia["marcacoes"], dia_seguinte["data"],dia_seguinte["dia_semana"], dia_seguinte["marcacoes"], calc["formato_string"]])
             
 
             for sit in dia["situacoes"]:
 
-                if 601 <= int(sit["codigo"]) <= 688 :
+                if sit["codigo"] in set_601_688:
                     # print(sit)
                     horasIntinmin = horas_para_minutos(sit["horas"])
                     horasInt = horasIntinmin / 60
@@ -448,7 +466,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                     if dia["data"] not in datas_Extras_nAut:
                         datas_Extras_nAut.append([dia["data"], dia["dia_semana"], dia["marcacoes"], sit["codigo"], sit["horas"], sit["descricao"]]) 
     
-                elif 301 <= int(sit["codigo"]) <= 336:
+                elif sit["codigo"] in set_301_336:
                     horasIntinmin = horas_para_minutos(sit["horas"])
                     horasInt = horasIntinmin / 60
                     total_Extras += horasInt
@@ -458,7 +476,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                     horasInt = horasIntinmin / 60
                     total_Extras -= horasInt
 
-                elif 351 <= int(sit["codigo"]) <= 390:
+                elif sit["codigo"] in set_351_390:
                     if sit["horas"] == "DSR":
                         if dia["data"] not in datas_Extras_nAut:
                             datas_Extras_nAut.append([dia["data"], dia["dia_semana"], dia["marcacoes"], sit["codigo"], sit["horas"], sit["descricao"]])
@@ -595,7 +613,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
             nome_funcionario = func['nome_colaborador']
             funcionariosEnviados.append(nome_funcionario)
             lideresEnviados.append(lider)
-            adicionar_registro_planilha(nome_funcionario, lider, "13a17-outubro-Enviados.xlsx")
+            adicionar_registro_planilha(nome_funcionario, lider, "11a18-outubro-Enviados.xlsx")
         
         print(f"📊 Registrados {len(funcionarios_deste_lider)} funcionários da liderança {lider}")
     else:

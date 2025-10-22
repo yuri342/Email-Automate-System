@@ -3,7 +3,7 @@ import re
 from pathlib import Path as path
 import json
 
-pdf = path(r"C:\Users\GARCIACUNHABERNARDO\OneDrive - TK Elevator\Documents\Email-automação-novo\Email-Automate-System\relatorio 5004 corrigido.pdf")
+pdf = path(r"C:\Users\GARCIACUNHABERNARDO\OneDrive - TK Elevator\Documents\Email-automação-novo\Email-Automate-System\relatorio 5005 e 5053.pdf")
 #json_data = path(r"ModeloEmail\dados.json")
 
 
