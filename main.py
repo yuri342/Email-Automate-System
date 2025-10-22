@@ -406,7 +406,7 @@ funcionarios = []
 jsonArq = pathlib.Path(r"projetos10.json")
 
 
-criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "aracaju-Enviados")
+criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "Enviados-5004")
 with open(jsonArq, 'r', encoding='utf-8') as arquivo:
     empregados = json.load(arquivo)
     for empregado in empregados["Empregados"]:
@@ -447,33 +447,35 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                     total_Extras += horasInt
                     if dia["data"] not in datas_Extras_nAut:
                         datas_Extras_nAut.append([dia["data"], dia["dia_semana"], dia["marcacoes"], sit["codigo"], sit["horas"], sit["descricao"]]) 
-                    cna = True
+    
                 elif 301 <= int(sit["codigo"]) <= 336:
                     horasIntinmin = horas_para_minutos(sit["horas"])
                     horasInt = horasIntinmin / 60
                     total_Extras += horasInt
-                elif 698 == int(sit["codigo"]):
-                    continue
+
+                elif sit["codigo"] in {"698", "699"}:
+                    horasIntinmin = horas_para_minutos(sit["horas"])
+                    horasInt = horasIntinmin / 60
+                    total_Extras -= horasInt
+
                 elif 351 <= int(sit["codigo"]) <= 390:
                     if sit["horas"] == "DSR":
                         if dia["data"] not in datas_Extras_nAut:
                             datas_Extras_nAut.append([dia["data"], dia["dia_semana"], dia["marcacoes"], sit["codigo"], sit["horas"], sit["descricao"]])
-                            cna = False
+                         
                     else:
                         horasIntinmin = horas_para_minutos(sit["horas"])
                         horasInt = horasIntinmin / 60
                         total_Extras += horasInt
                         if dia["data"] not in datas_Extras_nAut:
                             datas_Extras_nAut.append([dia["data"], dia["dia_semana"], dia["marcacoes"], sit["codigo"], sit["horas"], sit["descricao"]])
-                            cna = True
+                      
                 elif sit["codigo"] == "DSR":
                     continue
 
         if total_Extras >= 9: 
           ops.append(1)
 
-        if cna == True :
-            ops.append(2)
 
         if datas_interjor and len(datas_interjor) > 0:
             ops.append(3)
@@ -545,7 +547,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     
     # Construir corpo do email apenas com os funcionários desta liderança
     bodye = construir_email_body_multiplos_funcionarios(
-        periodo=f"13/10 A 17/10",
+        periodo=f"11/10 A 18/10",
         funcionarios=funcionarios_deste_lider
     )
     
@@ -558,7 +560,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
             destinatario=lider,
             assunto="Relatório de Horas Extras",
             corpo=bodye,
-            cc=["maicon.borba@tkelevator.com", "bernardo.cunha@tkelevator.com"],
+            cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
             enviar_automatico=True
         )
         sucesso = True
@@ -576,7 +578,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
                 destinatario=email,
                 assunto="Relatório de Horas Extras",
                 corpo=bodye,
-                cc=["maicon.borba@tkelevator.com", "bernardo.cunha@tkelevator.com"],
+                cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
                 enviar_automatico=True
             )
             sucesso = True
@@ -598,6 +600,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
         print(f"📊 Registrados {len(funcionarios_deste_lider)} funcionários da liderança {lider}")
     else:
         print(f"⚠️  Nenhum email enviado para liderança: {lider}")
+
 
 print(f"\n{'='*50}")
 print("RESUMO DO PROCESSAMENTO:")

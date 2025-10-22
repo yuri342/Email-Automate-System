@@ -2,6 +2,8 @@ Reports/
 model.html
 __pycache__/
 *.json
+*.pdf
 .vscode
 *.xlsx
 *.xlx
+lideranca.json

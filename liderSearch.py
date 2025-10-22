@@ -16,6 +16,7 @@ def excel_to_json(file_path):
     for index, row in df.iterrows():
         nome_funcionario = row['Nome']
         matricula_funcionario = row["Cadastro"]
+        cargo_funcionario = row['Cargo']
         lider = row['Lider Imediato']
         matricula_lider = row["Matr. Líder"]
         id_lider = row["8ID Líder"]
@@ -26,6 +27,7 @@ def excel_to_json(file_path):
             dados_json.append({
                 "Nome Funcionario": nome_funcionario,
                 "Matricula": matricula_funcionario,
+                "Cargo": cargo_funcionario,
                 "LIDER": lider,
                 "Matricula Lider": matricula_lider,
                 "8ID Lider": id_lider,
