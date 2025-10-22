@@ -4,7 +4,7 @@ from pathlib import Path as path
 import json
 
 pdf = path(r"Reports\relatorio_20251020-091812.pdf")
-json_data = path(r"ModeloEmail\dados.json")
+#json_data = path(r"ModeloEmail\dados.json")
 
 
 def filtrar_linhas_pdf(linhas):
