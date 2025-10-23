@@ -252,7 +252,7 @@ def enviar_email_outlook(destinatario, assunto, corpo, cc=None, anexo=None,
                          enviar_automatico=True, formato_html=True):
     """
     Envia e-mail via Outlook - MODO MANUAL SE NÃO RESOLVER
-    
+
     Args:
         destinatario (str ou list): E-mail(s) OU nome(s) da lista corporativa
         assunto (str): Assunto do e-mail
@@ -396,6 +396,29 @@ def diferenca_dias(data1, data2):
         return None
 
 
+def diferenca_horas(data1, hora1, data2, hora2):
+    """
+    Calcula a diferença em horas entre duas combinações de data e hora.
+    - data: formato 'DD/MM'
+    - hora: formato 'HH:MM'
+    Considera que ambas são do mesmo ano.
+    """
+    try:
+        ano_atual = datetime.now().year
+
+        # Montar data e hora completas
+        datahora1 = datetime.strptime(f"{data1}/{ano_atual} {hora1}", "%d/%m/%Y %H:%M")
+        datahora2 = datetime.strptime(f"{data2}/{ano_atual} {hora2}", "%d/%m/%Y %H:%M")
+
+        # Calcular diferença em horas (com precisão decimal)
+        diferenca_horas = abs((datahora2 - datahora1).total_seconds()) / 3600
+        return diferenca_horas
+
+    except ValueError as e:
+        print(f"Erro ao converter datas/horas: {e}")
+        return None
+
+
 def horas_para_minutos(horario):
     horas, minutos = map(int, horario.split(':'))
     return horas * 60 + minutos
@@ -450,11 +473,9 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
               if marcas and dia_seguinte["marcacoes"]:
                 ultima_hoje = marcas[-1]
                 primeira_amanha = dia_seguinte["marcacoes"][0]
-                calc = calcular_intervalo_datetime(ultima_hoje, primeira_amanha)
-                if 0 < calc["total_minutos"] < 660 and (diferenca_dias(dia_seguinte["data"], dia["data"]) <= 1): #11 horas em minutos
-                    calc = calcular_intervalo_datetime(ultima_hoje, primeira_amanha)
-                    datas_interjor.append([dia["data"], dia["dia_semana"], dia["marcacoes"], dia_seguinte["data"],dia_seguinte["dia_semana"], dia_seguinte["marcacoes"], calc["formato_string"]])
-            
+                interjornada = diferenca_horas(data1=dia["data"], hora1=ultima_hoje, data2=dia_seguinte["data"], hora2=primeira_amanha)
+                if 0 < interjornada < 11: #11 horas em minutos
+                    datas_interjor.append([dia["data"], dia["dia_semana"], dia["marcacoes"], dia_seguinte["data"],dia_seguinte["dia_semana"], dia_seguinte["marcacoes"], f"{int(interjornada):02d}:{int((interjornada - int(interjornada)) * 60):02d}"])                    
 
             for sit in dia["situacoes"]:
 
