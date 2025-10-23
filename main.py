@@ -39,7 +39,7 @@ set_351_390 = set(["351",
     "378", "379", "380", "381", "382", "383", "384", "385", "386", "387", "388", "389", "390"])
 
 
-def montar_funcionario(lider, nome_colaborador, HorasPendentes="", Fechamento_folha="", 
+def montar_funcionario(lider, nome_colaborador, cargo_colaborador="",  HorasPendentes="", Fechamento_folha="", 
                       data_inicio="", data_final="", ultimo_Ponto="", 
                       primeiro_ponto_outro="", interjornadas=None, 
                       horas_extras_nao_autorizadas=None, ops=None):
@@ -73,6 +73,7 @@ def montar_funcionario(lider, nome_colaborador, HorasPendentes="", Fechamento_fo
     return {
         'lider': lider,
         'nome_colaborador': nome_colaborador,
+        'cargo_colaborador': cargo_colaborador,
         'HorasPendentes': HorasPendentes,
         'Fechamento_folha': Fechamento_folha,
         'data_inicio': data_inicio,
@@ -376,6 +377,13 @@ def buscar_gerente_viaAtivo(nome, ativopath):
                 return funcionario["LIDER"]
     return None
         
+def buscar_cargo_viaAtivo(nome, ativopath):
+    with open(ativopath, 'r', encoding='utf-8') as arquivo:
+        ativos1 = json.load(arquivo)
+        for funcionario in ativos1:
+            if funcionario["Nome Funcionario"] == nome:
+                return funcionario["Cargo"]
+    return None
     
 
 def diferenca_dias(data1, data2):
@@ -447,7 +455,7 @@ funcionarios = []
 jsonArq = pathlib.Path(r"projetos10.json")
 
 
-criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "Enviados-TESTE")
+criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "Enviados-5014+")
 with open(jsonArq, 'r', encoding='utf-8') as arquivo:
     empregados = json.load(arquivo)
     for empregado in empregados["Empregados"]:
@@ -543,10 +551,12 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
 
             ativo = pathlib.Path(r"lideranca.json")
             lider = buscar_gerente_viaAtivo(nome, ativo)
+            cargo = buscar_cargo_viaAtivo(nome, ativo)
 
             funcionarios.append(montar_funcionario(
                 lider=lider,
                 nome_colaborador=nome,
+                cargo_colaborador=cargo,
                 HorasPendentes=str(total_Extras),
                 Fechamento_folha="10/11/2025",
                 data_inicio=datas_interjor[0][0]if 3 in ops else "",
@@ -634,7 +644,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
             nome_funcionario = func['nome_colaborador']
             funcionariosEnviados.append(nome_funcionario)
             lideresEnviados.append(lider)
-            adicionar_registro_planilha(nome_funcionario, lider, "11a18-outubro-Enviados.xlsx")
+            adicionar_registro_planilha(nome_funcionario, lider, "11a18-outubro-Enviados-5014+.xlsx")
         
         print(f"📊 Registrados {len(funcionarios_deste_lider)} funcionários da liderança {lider}")
     else:

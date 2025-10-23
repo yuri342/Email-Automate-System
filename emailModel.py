@@ -98,11 +98,12 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
     
     # HTML do funcionário
     nome_colaborador = funcionario.get('nome_colaborador', '')
+    cargo_colaborador = funcionario.get('cargo_colaborador', '')
     
     return f"""
     <div class="Employebox texto-controlado">
         <span>
-            <h3>{nome_colaborador}</h3>
+            <h3>{nome_colaborador}, {cargo_colaborador}</h3>
             <h5 style="margin-block-start: 0; margin-block-end: 0;">Scroll 🖱️⬇️➡️</h5>
             <hr>
         </span>
@@ -297,9 +298,7 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
         <!-- Observações -->
         <div class="observacoes" style="background-color: #e6e6e6;">
             <h3 style="margin-top: 0;">📝 Observações:</h3>
-            <p>• Casos especiais devem ser compensados conforme acordo ou suas devidas rotinas e OS's</p>
-            <p>• Próxima verificação no final do fechamento da proxima folha</p>
-            <p>• Está apuração sera verificada para auditar das ordems requisitadas</p>
+            <p>• Esta apuração será verificada para auditar as ordens requisitadas</p>
         </div>
 
         <!-- Rodapé Corporativo TKE -->
