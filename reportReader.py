@@ -3,8 +3,8 @@ import re
 from pathlib import Path as path
 import json
 
-pdf = path(r"Reports\relatorio_20251020-091812.pdf")
-json_data = path(r"ModeloEmail\dados.json")
+pdf = path(r"/mnt/c/Users/sysam/Documents/Projetos-Git/email-automation/Email-Automate-System/relatorio 5005.pdf")
+#json_data = path(r"ModeloEmail\dados.json")
 
 
 def filtrar_linhas_pdf(linhas):

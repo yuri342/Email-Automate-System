@@ -21,7 +21,6 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
     """
     ops = funcionario.get('ops', [])
     interjornadas = funcionario.get('interjornadas', [])
-    horas_extras_nao_autorizadas = funcionario.get('horas_extras_nao_autorizadas', [])
     
     # ===== SEÇÃO 1: COMPENSAÇÃO BANCO DE HORAS (OP 1) =====
     secao_compensacao = ""
@@ -97,47 +96,6 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
         </div>
         """
     
-    # ===== SEÇÃO 3: HORAS EXTRAS NÃO AUTORIZADAS (OP 2) =====
-    secao_horas_extras = ""
-    if 2 in ops:
-        lista_horas_extras = ""
-        for he in horas_extras_nao_autorizadas:
-            he_data = he[0]
-            he_sit_cod = he[-2]
-            he_hora = he[-3]
-            he_sit = he[-1]
-            lista_horas_extras += f"""
-            <div class="data-item">
-                <span class="data-label">{he_data}</span>
-                <span class="data-value">{he_sit}</span>
-                <span class="data-value">{he_sit_cod}</span>
-                <span class="status status-outro-2">{he_hora}</span>
-            </div>
-            """
-        
-        Fechamento_folha = funcionario.get('Fechamento_folha', '')
-        secao_horas_extras = f"""
-        <div class="situacao-box situacao-interjornada">
-            <h3 style="color: #ff3300; margin-top: 0;">⚠️ Horas Extras Não Autorizadas</h3>
-            
-            <div class="data-item">
-                <span class="data-label">Prazo para Compensação:</span>
-                <span class="data-value">{Fechamento_folha}</span>
-                <span class="status status-outro">Até fim da folha</span>
-            </div>
-
-            <div class="situacao-box situacao-interjornada">
-                <p style="text-align: justify;">
-                  As horas extras não estão sendo justificadas com as respectivas OS's (Ordem de Serviço). Solicito que o respectivo empregado justifique suas horas extras.  
-                </p>
-                <div style="margin-top: 15px;">
-                    <h4 style="margin-bottom: 10px;">Detalhamento:</h4>
-                    {lista_horas_extras if lista_horas_extras else "<p>Nenhuma hora extra não autorizada identificada.</p>"}
-                </div>
-            </div>
-        </div>
-        """
-    
     # HTML do funcionário
     nome_colaborador = funcionario.get('nome_colaborador', '')
     
@@ -150,7 +108,6 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
         </span>
         {secao_compensacao}
         {secao_interjornada}
-        {secao_horas_extras}
     </div>
     <hr/>
     """
@@ -328,7 +285,7 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
         <p>
             Em continuidade às análises de ponto dos colaboradores, informo que, neste mês,
             iniciamos uma avaliação mais criteriosa com o objetivo de apoiar as lideranças
-            no acompanhamento da jornada de seus colabaoradores. Verificamos, no período de <b>{periodo}</b>, a ocorrência
+            no acompanhamento da jornada de seus colaboradores. Verificamos, no período de <b>{periodo}</b>, a ocorrência
             das irregularidades dos seguintes colaboradores:
         </p>
 
@@ -350,9 +307,9 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
             <table>
                 <tr>
                     <td style="padding: 4px 0; vertical-align: top;">
-                        <b style="font-size:14px; color:#000;">Yuri Bertola de Souza</b><br>
+                        <b style="font-size:14px; color:#000;">Bernardo Garcia Cunha</b><br>
                         <span style="color:#444;">Planejamento e Projetos HR</span><br>
-                        <span style="color:#444;">Latin América</span>
+                        <span style="color:#444;">Latin America</span>
                     </td>
                 </tr>
                 <tr>

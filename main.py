@@ -21,6 +21,24 @@ global cna
 global funcionariosEnviados
 global lideresEnviados
 
+
+set_601_688 = set(["601", "602", "603", "604", "605", "606", "607", "608", "609", "610", "611", "612", "613",
+    "614", "615", "616", "617", "618", "619", "620", "621", "622", "623", "624", "625", "626",
+    "627", "628", "629", "630", "631", "632", "633", "634", "635", "636", "651", "652", "653",
+    "654", "655", "656", "657", "658", "659", "660", "661", "662", "663", "664", "665", "666",
+    "667", "668", "669", "670", "671", "672", "673", "674", "675", "676", "677", "678", "679",
+    "680", "681", "682", "683", "684", "685", "686", "687", "688"])
+
+set_301_336 = set(["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311",
+    "312", "313", "314", "315", "316", "317", "318", "319", "320", "321", "322", "323", "324",
+    "325", "326", "327", "328", "329", "330", "331", "332", "333", "334", "335", "336"])
+
+set_351_390 = set(["351",
+    "352", "353", "354", "355", "356", "357", "358", "359", "360", "361", "362", "363", "364",
+    "365", "366", "367", "368", "369", "370", "371", "372", "373", "374", "375", "376", "377",
+    "378", "379", "380", "381", "382", "383", "384", "385", "386", "387", "388", "389", "390"])
+
+
 def montar_funcionario(lider, nome_colaborador, HorasPendentes="", Fechamento_folha="", 
                       data_inicio="", data_final="", ultimo_Ponto="", 
                       primeiro_ponto_outro="", interjornadas=None, 
@@ -234,7 +252,7 @@ def enviar_email_outlook(destinatario, assunto, corpo, cc=None, anexo=None,
                          enviar_automatico=True, formato_html=True):
     """
     Envia e-mail via Outlook - MODO MANUAL SE NÃO RESOLVER
-    
+
     Args:
         destinatario (str ou list): E-mail(s) OU nome(s) da lista corporativa
         assunto (str): Assunto do e-mail
@@ -378,6 +396,29 @@ def diferenca_dias(data1, data2):
         return None
 
 
+def diferenca_horas(data1, hora1, data2, hora2):
+    """
+    Calcula a diferença em horas entre duas combinações de data e hora.
+    - data: formato 'DD/MM'
+    - hora: formato 'HH:MM'
+    Considera que ambas são do mesmo ano.
+    """
+    try:
+        ano_atual = datetime.now().year
+
+        # Montar data e hora completas
+        datahora1 = datetime.strptime(f"{data1}/{ano_atual} {hora1}", "%d/%m/%Y %H:%M")
+        datahora2 = datetime.strptime(f"{data2}/{ano_atual} {hora2}", "%d/%m/%Y %H:%M")
+
+        # Calcular diferença em horas (com precisão decimal)
+        diferenca_horas = abs((datahora2 - datahora1).total_seconds()) / 3600
+        return diferenca_horas
+
+    except ValueError as e:
+        print(f"Erro ao converter datas/horas: {e}")
+        return None
+
+
 def horas_para_minutos(horario):
     horas, minutos = map(int, horario.split(':'))
     return horas * 60 + minutos
@@ -406,7 +447,7 @@ funcionarios = []
 jsonArq = pathlib.Path(r"projetos10.json")
 
 
-criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "aracaju-Enviados")
+criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "Enviados-TESTE")
 with open(jsonArq, 'r', encoding='utf-8') as arquivo:
     empregados = json.load(arquivo)
     for empregado in empregados["Empregados"]:
@@ -432,48 +473,48 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
               if marcas and dia_seguinte["marcacoes"]:
                 ultima_hoje = marcas[-1]
                 primeira_amanha = dia_seguinte["marcacoes"][0]
-                calc = calcular_intervalo_datetime(ultima_hoje, primeira_amanha)
-                if 0 < calc["total_minutos"] <= 660 and diferenca_dias(dia_seguinte["data"], dia["data"]) >= 1: #11 horas em minutos
-                    calc = calcular_intervalo_datetime(ultima_hoje, primeira_amanha)
-                    datas_interjor.append([dia["data"], dia["dia_semana"], dia["marcacoes"], dia_seguinte["data"],dia_seguinte["dia_semana"], dia_seguinte["marcacoes"], calc["formato_string"]])
-            
+                interjornada = diferenca_horas(data1=dia["data"], hora1=ultima_hoje, data2=dia_seguinte["data"], hora2=primeira_amanha)
+                if 0 < interjornada < 11: #11 horas em minutos
+                    datas_interjor.append([dia["data"], dia["dia_semana"], dia["marcacoes"], dia_seguinte["data"],dia_seguinte["dia_semana"], dia_seguinte["marcacoes"], f"{int(interjornada):02d}:{int((interjornada - int(interjornada)) * 60):02d}"])                    
 
             for sit in dia["situacoes"]:
 
-                if 601 <= int(sit["codigo"]) <= 688 :
+                if sit["codigo"] in set_601_688:
                     # print(sit)
                     horasIntinmin = horas_para_minutos(sit["horas"])
                     horasInt = horasIntinmin / 60
                     total_Extras += horasInt
                     if dia["data"] not in datas_Extras_nAut:
                         datas_Extras_nAut.append([dia["data"], dia["dia_semana"], dia["marcacoes"], sit["codigo"], sit["horas"], sit["descricao"]]) 
-                    cna = True
-                elif 301 <= int(sit["codigo"]) <= 336:
+    
+                elif sit["codigo"] in set_301_336:
                     horasIntinmin = horas_para_minutos(sit["horas"])
                     horasInt = horasIntinmin / 60
                     total_Extras += horasInt
-                elif 698 == int(sit["codigo"]):
-                    continue
-                elif 351 <= int(sit["codigo"]) <= 390:
+
+                elif sit["codigo"] in {"698", "699"}:
+                    horasIntinmin = horas_para_minutos(sit["horas"])
+                    horasInt = horasIntinmin / 60
+                    total_Extras -= horasInt
+
+                elif sit["codigo"] in set_351_390:
                     if sit["horas"] == "DSR":
                         if dia["data"] not in datas_Extras_nAut:
                             datas_Extras_nAut.append([dia["data"], dia["dia_semana"], dia["marcacoes"], sit["codigo"], sit["horas"], sit["descricao"]])
-                            cna = False
+                         
                     else:
                         horasIntinmin = horas_para_minutos(sit["horas"])
                         horasInt = horasIntinmin / 60
                         total_Extras += horasInt
                         if dia["data"] not in datas_Extras_nAut:
                             datas_Extras_nAut.append([dia["data"], dia["dia_semana"], dia["marcacoes"], sit["codigo"], sit["horas"], sit["descricao"]])
-                            cna = True
+                      
                 elif sit["codigo"] == "DSR":
                     continue
 
         if total_Extras >= 9: 
           ops.append(1)
 
-        if cna == True :
-            ops.append(2)
 
         if datas_interjor and len(datas_interjor) > 0:
             ops.append(3)
@@ -545,7 +586,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     
     # Construir corpo do email apenas com os funcionários desta liderança
     bodye = construir_email_body_multiplos_funcionarios(
-        periodo=f"13/10 A 17/10",
+        periodo=f"11/10 A 18/10",
         funcionarios=funcionarios_deste_lider
     )
     
@@ -558,7 +599,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
             destinatario=lider,
             assunto="Relatório de Horas Extras",
             corpo=bodye,
-            cc=["maicon.borba@tkelevator.com", "bernardo.cunha@tkelevator.com"],
+            cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
             enviar_automatico=True
         )
         sucesso = True
@@ -576,7 +617,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
                 destinatario=email,
                 assunto="Relatório de Horas Extras",
                 corpo=bodye,
-                cc=["maicon.borba@tkelevator.com", "bernardo.cunha@tkelevator.com"],
+                cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
                 enviar_automatico=True
             )
             sucesso = True
@@ -593,11 +634,12 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
             nome_funcionario = func['nome_colaborador']
             funcionariosEnviados.append(nome_funcionario)
             lideresEnviados.append(lider)
-            adicionar_registro_planilha(nome_funcionario, lider, "13a17-outubro-Enviados.xlsx")
+            adicionar_registro_planilha(nome_funcionario, lider, "11a18-outubro-Enviados.xlsx")
         
         print(f"📊 Registrados {len(funcionarios_deste_lider)} funcionários da liderança {lider}")
     else:
         print(f"⚠️  Nenhum email enviado para liderança: {lider}")
+
 
 print(f"\n{'='*50}")
 print("RESUMO DO PROCESSAMENTO:")
