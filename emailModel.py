@@ -31,10 +31,10 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
         
         secao_compensacao = f"""
         <div class="situacao-box situacao-interjornada">
-            <h3 style="color: #000000; margin-top: 0;">⏰ Compensação de Horas Extras</h3>
+            <h3 style="color: #000000; margin-top: 0;">⏰ Horas Extras</h3>
             
             <div class="data-item">
-                <span class="data-label">Horas excedentes para compensação:</span>
+                <span class="data-label">Horas excedentes:</span>
                 <span class="data-value">{HorasPendentestrimed}</span>
                 <span class="status status-interjornada">Horas Extras</span>
             </div>
@@ -47,7 +47,7 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
             
             <div class="data-item">
                 <span class="data-label">Ordem:</span>
-                <span class="data-value">Solicitamos informar quais serão os planos de compensação para esses acumulados.</span>
+                <span class="data-value">Caso o colaborador tenha jornada flex, solicitamos informar quais serão os planos de compensação para esses acumulados.</span>
             </div>
         </div>
         """
@@ -299,6 +299,11 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
         <div class="observacoes" style="background-color: #e6e6e6;">
             <h3 style="margin-top: 0;">📝 Observações:</h3>
             <p>• Esta apuração será verificada para auditar as ordens requisitadas</p>
+            <p>• Casos especiais devem ser compensados conforme acordo ou suas devidas rotinas e OS's</p>
+            <p>• Este é um e-mail automático. Por favor, nos avise em caso de erros ou divergências.</p>
+            <p>• Tenha em mente que compensação aplica-se apenas às jornadas flex.</p>
+
+
         </div>
 
         <!-- Rodapé Corporativo TKE -->

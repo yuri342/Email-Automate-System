@@ -3,7 +3,7 @@ import re
 from pathlib import Path as path
 import json
  
-pdf = path(r"relatorio 5005 a 5069 11-10_25-10.pdf")
+pdf = path(r"relatorio 5077 a 5066 11-10_25-10.pdf")
 #json_data = path(r"ModeloEmail\dados.json")
  
  
@@ -128,7 +128,7 @@ with pdfplumber.open(pdf) as pdf:
     total_colab = False
 
     for numero_pagina, pagina in enumerate(pdf.pages):
-        #print(f"\n--- Página {numero_pagina + 1} ---")
+        print(f"\n--- Página {numero_pagina + 1} ---")
         texto_completo = pagina.extract_text()
        
         # Divide o texto em linhas e ignora as primeiras N
@@ -157,7 +157,7 @@ with pdfplumber.open(pdf) as pdf:
  
                 # ✅ ADICIONE ESTA VERIFICAÇÃO
                 if id in ids:
-                    #print(f"⚠️  Funcionário {id} já existe - pulando")
+                    print(f"⚠️  Funcionário {id} já existe - pulando")
                     continue  # Pula para a próxima linha
  
                 # B: Tirei a escala, horário, etc porque não são mais pegos nessa parte.
@@ -174,10 +174,8 @@ with pdfplumber.open(pdf) as pdf:
             # B: Ignora quando chega no total do colaborador.
             if ((linha.split()[0]).casefold() == "Total".casefold()) and ((linha.split()[1]).casefold() == "Colaborador:".casefold()):
                 total_colab = True
-                print("True: ", total_colab)
                 
             if total_colab and ids:
-                print("Pular: ", total_colab)
                 continue
 
 

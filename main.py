@@ -454,8 +454,12 @@ lideresEnviados = []
 funcionarios = []
 jsonArq = pathlib.Path(r"projetos10.json")
 
+func_manual = set()
+lider_manual = set()
 
-criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "Enviados-5005+")
+# B: Essa planilha está saindo sem nada, então comentei ela.
+#criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "Enviados-5005+")
+
 with open(jsonArq, 'r', encoding='utf-8') as arquivo:
     empregados = json.load(arquivo)
     for empregado in empregados["Empregados"]:
@@ -473,7 +477,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
         # Ignora quem não for técnico.
         ativo = pathlib.Path(r"lideranca.json")
         cargo = buscar_cargo_viaAtivo(nome, ativo)
-        print(cargo)
+        #print(cargo)
         try:
             if cargo.split()[0] != "TECNICO":
                 continue
@@ -492,8 +496,16 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                 ultima_hoje = marcas[-1]
                 primeira_amanha = dia_seguinte["marcacoes"][0]
                 interjornada = diferenca_horas(data1=dia["data"], hora1=ultima_hoje, data2=dia_seguinte["data"], hora2=primeira_amanha)
-                if 0 < interjornada < 11: #11 horas em minutos
+                # B: Filtra a interjornada. Ignora quem tiver menos de 1 hora (provavelmente é um dos casos
+                # de bater o ponto 23:59 de um dia e depois 00:01 do outro.
+                if 1 < interjornada < 11:
                     datas_interjor.append([dia["data"], dia["dia_semana"], dia["marcacoes"], dia_seguinte["data"],dia_seguinte["dia_semana"], dia_seguinte["marcacoes"], f"{int(interjornada):02d}:{int((interjornada - int(interjornada)) * 60):02d}"])                    
+                    
+                    # B: Coloca no manual quem tiver menos de 5 horas de interjornada para
+                    # evitar um problema no cálculo.
+                    if interjornada < 6: 
+                        if (nome not in func_manual) and nome:
+                            func_manual.add(nome)
 
             for sit in dia["situacoes"]:
 
@@ -537,10 +549,10 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
         if datas_interjor and len(datas_interjor) > 0:
             ops.append(3)
 
-        print_relatorio_dinamico(total_Extras, datas_Extras_nAut, datas_interjor, nome, horario, ops)
+        #print_relatorio_dinamico(total_Extras, datas_Extras_nAut, datas_interjor, nome, horario, ops)
 # Gerar email apenas se houver irregularidades
         if len(ops) > 0:
-            print(ops)
+            #print(ops)
             from datetime import date, timedelta
             hoje = "10/10/2025"
             amanha = date.today() + timedelta(days=1)
@@ -585,11 +597,15 @@ for func in funcionarios:
         funcionarios_por_lider[lider] = []
     funcionarios_por_lider[lider].append(func)
 
+    # B: Encontra o lider que tem um funcionário marcado para manual.
+    func_nome = func["nome_colaborador"]
+    if func_nome in func_manual:
+        if (lider not in lider_manual) and lider:
+            lider_manual.add(lider)
+
+
 # Agora processa cada liderança separadamente
-trava = 0
 for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
-    if trava > 10:
-        break
     print(f"\n{'='*50}")
     print(f"{funcionarios_deste_lider}")
     print(f"\n{'='*50}")
@@ -608,7 +624,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     
     # Construir corpo do email apenas com os funcionários desta liderança
     bodye = construir_email_body_multiplos_funcionarios(
-        periodo=f"11/10 A 18/10",
+        periodo=f"11/10 A 25/10",
         funcionarios=funcionarios_deste_lider
     )
     
@@ -622,7 +638,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
             assunto="Relatório de Horas Extras",
             corpo=bodye,
             cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
-            enviar_automatico=False
+            enviar_automatico=True if lider not in lider_manual else False
         )
         sucesso = True
         print(f"✅ Email aberto para envio manual: {lider}")
@@ -640,7 +656,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
                 assunto="Relatório de Horas Extras",
                 corpo=bodye,
                 cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
-                enviar_automatico=False
+                enviar_automatico=True if lider not in lider_manual else False
             )
             sucesso = True
             print(f"✅ E-mail enviado com sucesso para: {email}")
@@ -661,9 +677,6 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
         print(f"📊 Registrados {len(funcionarios_deste_lider)} funcionários da liderança {lider}")
     else:
         print(f"⚠️  Nenhum email enviado para liderança: {lider}")
-
-    trava += 1
-
 
 print(f"\n{'='*50}")
 print("RESUMO DO PROCESSAMENTO:")
