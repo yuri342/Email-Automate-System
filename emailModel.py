@@ -31,12 +31,12 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
         
         secao_compensacao = f"""
         <div class="situacao-box situacao-interjornada">
-            <h3 style="color: #000000; margin-top: 0;">⏰ Compensação Banco de Horas Extras</h3>
+            <h3 style="color: #000000; margin-top: 0;">⏰ Compensação de Horas Extras</h3>
             
             <div class="data-item">
                 <span class="data-label">Horas excedentes para compensação:</span>
                 <span class="data-value">{HorasPendentestrimed}</span>
-                <span class="status status-interjornada">Banco de Horas</span>
+                <span class="status status-interjornada">Horas Extras</span>
             </div>
             
             <div class="data-item">

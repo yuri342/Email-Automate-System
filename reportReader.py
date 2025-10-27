@@ -3,7 +3,7 @@ import re
 from pathlib import Path as path
 import json
  
-pdf = path(r"relatorio 5029, 5052, 5023, 5031, 5032, 5037, 5044, 5045, 5066.pdf")
+pdf = path(r"relatorio 5005 a 5069 11-10_25-10.pdf")
 #json_data = path(r"ModeloEmail\dados.json")
  
  
@@ -125,9 +125,10 @@ with pdfplumber.open(pdf) as pdf:
     horarioId = 0 
     horario = 0 
     situacao = []
+    total_colab = False
 
     for numero_pagina, pagina in enumerate(pdf.pages):
-        print(f"\n--- Página {numero_pagina + 1} ---")
+        #print(f"\n--- Página {numero_pagina + 1} ---")
         texto_completo = pagina.extract_text()
        
         # Divide o texto em linhas e ignora as primeiras N
@@ -149,8 +150,9 @@ with pdfplumber.open(pdf) as pdf:
                         print(f"Data: {data} | Dia: {dia_semana} | Marcacoes: {marcacoes} | Situacao: {situacao} \n")
                     escala = 0  
                     turma = 0 
-                    horarioId = 0 
-                    horario = 0 
+                    horarioId = 0
+                    horario = 0
+                    total_colab = False
 
  
                 # ✅ ADICIONE ESTA VERIFICAÇÃO
@@ -169,7 +171,16 @@ with pdfplumber.open(pdf) as pdf:
                     # ✅ ADICIONE ESTA LINHA - Marcar ID como adicionado
                     ids.add(id)
  
- 
+            # B: Ignora quando chega no total do colaborador.
+            if ((linha.split()[0]).casefold() == "Total".casefold()) and ((linha.split()[1]).casefold() == "Colaborador:".casefold()):
+                total_colab = True
+                print("True: ", total_colab)
+                
+            if total_colab and ids:
+                print("Pular: ", total_colab)
+                continue
+
+
             elif re.match(padraoData, linha):
                 # B: Pega os casos de mudança de página em que reaparece o mesmo dia com situações que não couberam
                 # na página anterior.

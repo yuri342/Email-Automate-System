@@ -455,7 +455,7 @@ funcionarios = []
 jsonArq = pathlib.Path(r"projetos10.json")
 
 
-criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "Enviados-5014+")
+criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "Enviados-5005+")
 with open(jsonArq, 'r', encoding='utf-8') as arquivo:
     empregados = json.load(arquivo)
     for empregado in empregados["Empregados"]:
@@ -465,11 +465,21 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
         nome = ""
         horario = ""
         ops = []
-        cna = False
-        
+       
 
         nome = empregado["nome"]
         horario = empregado["horario"]
+
+        # Ignora quem não for técnico.
+        ativo = pathlib.Path(r"lideranca.json")
+        cargo = buscar_cargo_viaAtivo(nome, ativo)
+        print(cargo)
+        try:
+            if cargo.split()[0] != "TECNICO":
+                continue
+        except:
+            pass
+        
         for dia in empregado["dias_trabalho"]:
             dias = empregado["dias_trabalho"]
             index_atual = empregado["dias_trabalho"].index(dia)
@@ -520,7 +530,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                 elif sit["codigo"] == "DSR":
                     continue
 
-        if total_Extras >= 9: 
+        if total_Extras >= 10: # B: Alterar dependendo de quantas semanas faz desde o inicio do ponto.
           ops.append(1)
 
 
@@ -549,9 +559,8 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
             #     ops=ops
             # )
 
-            ativo = pathlib.Path(r"lideranca.json")
+            
             lider = buscar_gerente_viaAtivo(nome, ativo)
-            cargo = buscar_cargo_viaAtivo(nome, ativo)
 
             funcionarios.append(montar_funcionario(
                 lider=lider,
@@ -577,7 +586,10 @@ for func in funcionarios:
     funcionarios_por_lider[lider].append(func)
 
 # Agora processa cada liderança separadamente
+trava = 0
 for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
+    if trava > 10:
+        break
     print(f"\n{'='*50}")
     print(f"{funcionarios_deste_lider}")
     print(f"\n{'='*50}")
@@ -610,7 +622,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
             assunto="Relatório de Horas Extras",
             corpo=bodye,
             cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
-            enviar_automatico=True
+            enviar_automatico=False
         )
         sucesso = True
         print(f"✅ Email aberto para envio manual: {lider}")
@@ -628,7 +640,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
                 assunto="Relatório de Horas Extras",
                 corpo=bodye,
                 cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
-                enviar_automatico=True
+                enviar_automatico=False
             )
             sucesso = True
             print(f"✅ E-mail enviado com sucesso para: {email}")
@@ -644,11 +656,13 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
             nome_funcionario = func['nome_colaborador']
             funcionariosEnviados.append(nome_funcionario)
             lideresEnviados.append(lider)
-            adicionar_registro_planilha(nome_funcionario, lider, "11a18-outubro-Enviados-5014+.xlsx")
+            adicionar_registro_planilha(nome_funcionario, lider, "11a25-outubro-Enviados-5005+.xlsx")
         
         print(f"📊 Registrados {len(funcionarios_deste_lider)} funcionários da liderança {lider}")
     else:
         print(f"⚠️  Nenhum email enviado para liderança: {lider}")
+
+    trava += 1
 
 
 print(f"\n{'='*50}")
