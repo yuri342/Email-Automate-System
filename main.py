@@ -229,12 +229,12 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
         # Primeiro tenta enviar usando o nome
         print(f"📧 Tentando enviar para: {lider}")
         enviar_email_outlook(
-            destinatario="bernardo.cunha@tkelevator.com",
+            destinatario=lider,
             assunto="Relatório de Horas Extras",
             corpo=bodye,
             cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
             #enviar_automatico=True if lider not in lider_manual else False
-            enviar_automatico = False
+            enviar_automatico=True if lider not in lider_manual else False
         )
         sucesso = True
         print(f"✅ Email aberto para envio manual: {lider}")
@@ -248,11 +248,11 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
         try:
             print(f"📧 Tentando enviar para email: {email}")
             enviar_email_outlook(
-                destinatario="bernardo.cunha@tkelevator.com",
+                destinatario=email,
                 assunto="Relatório de Horas Extras",
                 corpo=bodye,
                 cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
-                enviar_automatico = False
+                enviar_automatico=True if lider not in lider_manual else False
             )
             sucesso = True
             print(f"✅ E-mail enviado com sucesso para: {email}")
