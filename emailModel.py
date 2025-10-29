@@ -21,6 +21,7 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
     """
     ops = funcionario.get('ops', [])
     interjornadas = funcionario.get('interjornadas', [])
+    datas_sem_descanso = funcionario.get('datas_sem_descanso', [])
     
     # ===== SEÇÃO 1: COMPENSAÇÃO BANCO DE HORAS (OP 1) =====
     secao_compensacao = ""
@@ -48,6 +49,47 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
             <div class="data-item">
                 <span class="data-label">Ordem:</span>
                 <span class="data-value">Caso o colaborador tenha jornada flex, solicitamos informar quais serão os planos de compensação para esses acumulados.</span>
+            </div>
+        </div>
+        """
+
+    secao_descanso = ""
+    if 2 in ops:
+        tabela_dias_sequencia = ""
+        for data in datas_sem_descanso:
+            data_inicio_descanso = data[0]
+            data_fim_descanso = data[1]
+            total_dias = data[2]
+            
+            tabela_dias_sequencia += f"""
+            <div class="data-item">
+                <span class="data-label"> Início: {data_inicio_descanso}, Fim:{data_fim_descanso}</span>
+                <span class="status status-outro">{total_dias} dias em sequência</span>
+            </div>
+            """
+        
+        secao_descanso = f"""
+        <div class="situacao-box situacao-interjornada">
+            <h3 style="color: #005b96; margin-top: 0;">⚠️ Descanso Semanal </h3>
+            
+            <div class="data-item">
+                <span class="data-label">Período Analisado:</span>
+                <span class="data-value">{periodo}</span>
+            </div>
+            
+            <div class="data-item">
+                <span class="data-label">Máximo Legal:</span>
+                <span class="data-value">6 dias consecutivos</span>
+                <span class="status status-outro">Não Respeitado</span>
+            </div>
+
+            <div class="situacao-box situacao-outro">
+                <p style="text-align: justify;">Verifica-se que não está sendo observado o limite de 6 dias de trabalho consecutivos. Essa prática configura descumprimento da legislação trabalhista, podendo resultar em autuações e passivos para a empresa</p>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <h4 style="margin-bottom: 10px;">Ocorrências Identificadas:</h4>
+                {tabela_dias_sequencia if tabela_dias_sequencia else "<p>Nenhum problema em relação ao descanso semanal identificado.</p>"}
             </div>
         </div>
         """
@@ -109,6 +151,7 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
         </span>
         {secao_compensacao}
         {secao_interjornada}
+        {secao_descanso}
     </div>
     <hr/>
     """
