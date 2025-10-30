@@ -117,7 +117,6 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
         #print_relatorio_dinamico(total_Extras, datas_Extras_nAut, datas_interjor, nome, horario, ops)
 # Gerar email apenas se houver irregularidades
         if len(ops) > 0:
-            #print(ops)
             from datetime import date, timedelta
             hoje = "03/11/2025"
             amanha = date.today() + timedelta(days=1)
@@ -168,16 +167,9 @@ for func in funcionarios:
         if (lider not in lider_manual) and lider:
             lider_manual.add(lider)
 
-
 # Agora processa cada liderança separadamente
+planilha_final = f"{datetime.now().strftime("%d-%m-%Y %H-%M-%S")}.xlsx"
 for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
-    print(f"\n{'='*50}")
-    print(f"{funcionarios_deste_lider}")
-    print(f"\n{'='*50}")
-    print(f"Processando email para liderança: {lider}")
-    print(f"Total de funcionários: {len(funcionarios_deste_lider)}")
-    print(f"{'='*50}")
-    
     # Limpar o nome do líder para busca de email
     if lider is not None and lider != "":
         liderlimpo = " ".join(lider.split()[1:]) + ", " + lider.split()[0]
@@ -194,16 +186,13 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     )
     
     sucesso = False
-    
     try:
         # Primeiro tenta enviar usando o nome
-        print(f"📧 Tentando enviar para: {lider}")
         enviar_email_outlook(
             destinatario=lider,
             assunto="Relatório de Horas Extras",
             corpo=bodye,
             cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
-            #enviar_automatico=True if lider not in lider_manual else False
             enviar_automatico=True if lider not in lider_manual else False
         )
         sucesso = True
@@ -214,9 +203,9 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
         sucesso = False
     
     # Se falhar e tiver e-mail, tenta novamente usando o e-mail
+    
     if not sucesso and email:
         try:
-            print(f"📧 Tentando enviar para email: {email}")
             enviar_email_outlook(
                 destinatario=email,
                 assunto="Relatório de Horas Extras",
@@ -237,25 +226,9 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
         for func in funcionarios_deste_lider:
             nome_funcionario = func['nome_colaborador']
             funcionariosEnviados.append(nome_funcionario)
-            lideresEnviados.append(lider)
-            adicionar_registro_planilha(nome_funcionario, lider, "teste+.xlsx")
+            adicionar_registro_planilha(nome_funcionario, lider, planilha_final)
         
-        print(f"📊 Registrados {len(funcionarios_deste_lider)} funcionários da liderança {lider}")
-    else:
-        print(f"⚠️  Nenhum email enviado para liderança: {lider}")
-
-
-print(f"\n{'='*50}")
-print("RESUMO DO PROCESSAMENTO:")
-print(f"Total de lideranças processadas: {len(funcionarios_por_lider)}")
-print(f"Total de funcionários enviados: {len(funcionariosEnviados)}")
-print(f"{'='*50}")
-    
-
-
-
-      
-
-
+        lideresEnviados.append(lider)
+       
 
 

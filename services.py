@@ -53,8 +53,7 @@ def montar_funcionario(lider, nome_colaborador, cargo_colaborador="", HorasPende
     
     if interjornadas is None:
         interjornadas = []
-    if horas_extras_nao_autorizadas is None:
-        horas_extras_nao_autorizadas = []
+    
     if ops is None:
         ops = []
     
@@ -103,18 +102,13 @@ def buscar_email_na_gal(nome):
                     exchange_user = recipient.AddressEntry.GetExchangeUser()
                     if exchange_user:
                         email = exchange_user.PrimarySmtpAddress
-                        print(f"✅ Email encontrado na GAL ({nomes_permutados}): {email}")
                         return email
                 else:
                     # Outro tipo de entrada
-                    print(f"✅ Email encontrado ({nomes_permutados}): {email}")
                     return email
-
-        print(f"❌ Nenhum e-mail encontrado na GAL para o nome '{nome}'")
         return None
 
     except Exception as e:
-        print(f"❌ Erro ao buscar email para '{nome}': {str(e)}")
         return None
 
 def buscar_multiplos_emails(nomes):
@@ -173,9 +167,6 @@ def criar_planilha_empregado_lider(array_empregados, array_lideres, nome_arquivo
     # Salva a planilha
     df.to_excel(nome_arquivo, index=False, engine='openpyxl')
     
-    print(f"✅ Planilha criada com sucesso: {nome_arquivo}")
-    print(f"📊 Total de registros: {len(df)}")
-    
     return nome_arquivo
 
 def adicionar_registro_planilha(empregado, lider, nome_arquivo="relacao_empregado_lider.xlsx"):
@@ -209,32 +200,6 @@ def adicionar_registro_planilha(empregado, lider, nome_arquivo="relacao_empregad
     
     # Salva a planilha
     df.to_excel(nome_arquivo, index=False, engine='openpyxl')
-    print(f"✅ Registro adicionado: {empregado} -> {lider}")
-
-
-def print_relatorio_dinamico(total_Extras, datas_Extras, datas_interjor, nome, horario, ops):
-    print("=" * 60)
-    print("📊 RELATÓRIO DE ANÁLISE DE PONTO")
-    print("=" * 60)
-    print(f"👤 Colaborador: {nome}")
-    print(f"🕒 Horário: {horario}")
-    print(f"📈 Total de Horas Extras: {total_Extras:.2f}h")
-    
-    if datas_Extras:
-        print(f"📅 Datas com Horas Extras: {(datas_Extras)}")
-    else:
-        print("📅 Datas com Horas Extras: Nenhuma")
-    
-    if datas_interjor:
-        print(f"⚠️  Datas com Interjornada: {datas_interjor}" +"\n")
-    else:
-        print("⚠️  Datas com Interjornada: Nenhuma" +"\n")
-    
-    if ops:
-        print(f"🔧 Itens do Relatório: {', '.join(map(str, ops))}")
-    else:
-        print("🔧 Itens do Relatório: Nenhum")
-    print("=" * 60)
 
 
 def enviar_email_outlook(destinatario, assunto, corpo, cc=None, anexo=None, 
@@ -287,11 +252,9 @@ def enviar_email_outlook(destinatario, assunto, corpo, cc=None, anexo=None,
         for recipient in mail.Recipients:
             if not recipient.Resolved:
                 destinatarios_nao_resolvidos.append(recipient.Name)
-                print(f"❌ Destinatário não resolvido: '{recipient.Name}'")
         
         # ✅ SE HÁ DESTINATÁRIOS NÃO RESOLVIDOS, VAI PARA MODO MANUAL
         if destinatarios_nao_resolvidos:
-            print(f"\n⚠️ {len(destinatarios_nao_resolvidos)} destinatário(s) não encontrado(s):")
             for nome in destinatarios_nao_resolvidos:
                 print(f"   - {nome}")
             
@@ -320,7 +283,6 @@ def enviar_email_outlook(destinatario, assunto, corpo, cc=None, anexo=None,
         # Envia ou exibe (só chega aqui se TODOS os destinatários foram resolvidos)
         if enviar_automatico:
             mail.Send()
-            print(f"✅ E-mail enviado com sucesso!")
             return True
         else:
             mail.Display()

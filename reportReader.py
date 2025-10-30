@@ -128,7 +128,6 @@ with pdfplumber.open(pdf) as pdf:
     total_colab = False
 
     for numero_pagina, pagina in enumerate(pdf.pages):
-        print(f"\n--- Página {numero_pagina + 1} ---")
         texto_completo = pagina.extract_text()
        
         # Divide o texto em linhas e ignora as primeiras N
@@ -147,7 +146,7 @@ with pdfplumber.open(pdf) as pdf:
                 if not(id in ids) and ids:
                     for sit in situacao:
                         adicionar_situacao(funcionario_atual["dias_trabalho"][-1], sit[0], sit[1], sit[2])
-                        print(f"Data: {data} | Dia: {dia_semana} | Marcacoes: {marcacoes} | Situacao: {situacao} \n")
+
                     escala = 0  
                     turma = 0 
                     horarioId = 0
@@ -157,14 +156,8 @@ with pdfplumber.open(pdf) as pdf:
  
                 # ✅ ADICIONE ESTA VERIFICAÇÃO
                 if id in ids:
-                    print(f"⚠️  Funcionário {id} já existe - pulando")
                     continue  # Pula para a próxima linha
  
-                # B: Tirei a escala, horário, etc porque não são mais pegos nessa parte.
-                print("Dados do Funcionário:\n")
-                print(f"Matrícula: {id}")
-                print(f"Nome: {nome}\n")
-                print("-------------------------")
                 funcionario_atual = criar_funcionario(id, nome, escala, turma, horario, horarioId)
                 if funcionario_atual:
                     funcionarios.append(funcionario_atual)

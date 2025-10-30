@@ -8,3 +8,4 @@ __pycache__/
 *.xlx
 lideranca.json
 .venv/
+limparPlanilha.py
