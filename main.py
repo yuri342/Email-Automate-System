@@ -6,10 +6,6 @@ from datetime import datetime
 from datetime import datetime, timedelta
 from services import *
 
-import sys
-
-
-
 funcionariosEnviados = []
 lideresEnviados = []
 funcionarios = []
@@ -18,14 +14,11 @@ jsonArq = pathlib.Path(r"projetos10.json")
 func_manual = set()
 lider_manual = set()
 
-# B: Essa planilha está saindo sem nada, então comentei ela.
-#criar_planilha_empregado_lider(funcionariosEnviados, lideresEnviados, "Enviados-5005+")
-
 with open(jsonArq, 'r', encoding='utf-8') as arquivo:
     empregados = json.load(arquivo)
+    # B: Itera sobre cada empregado do arquivo "projetosX.json"
     for empregado in empregados["Empregados"]:
         total_Extras = 0
-        datas_Extras_nAut = []
         datas_interjor = []
         datas_sem_descanso = []
         dias_sequencia = 0
@@ -40,14 +33,14 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
         # Ignora quem não for técnico.
         ativo = pathlib.Path(r"lideranca.json")
         cargo = buscar_cargo_viaAtivo(nome, ativo)
-        #print(cargo)
+
         try:
             if cargo.split()[0] != "TECNICO":
                 continue
         except:
             pass
 
-
+        # B: Itera sobre cada dia de trabalho.
         for dia in empregado["dias_trabalho"]:
             dias = empregado["dias_trabalho"]
             index_atual = empregado["dias_trabalho"].index(dia)
@@ -67,46 +60,24 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                 if 1 < interjornada < 11:
                     datas_interjor.append([dia["data"], dia["dia_semana"], dia["marcacoes"], dia_seguinte["data"],dia_seguinte["dia_semana"], dia_seguinte["marcacoes"], f"{int(interjornada):02d}:{int((interjornada - int(interjornada)) * 60):02d}"])                    
                     
-                    # B: Coloca no manual quem tiver menos de 5 horas de interjornada para
-                    # evitar um problema no cálculo.
+                    # B: Coloca no manual quem tiver menos de 5 horas de interjornada para evitar erros
+                    # casos especiais com casos especiais que geram problema no cálculo.
                     if interjornada < 6: 
                         if (nome not in func_manual) and nome:
                             func_manual.add(nome)
 
+            # B: Testa situação para somar hora extra.
             for sit in dia["situacoes"]:
 
-                if sit["codigo"] in set_601_688:
-                    # print(sit)
+                if sit["codigo"] in set_horas_extras:
                     horasIntinmin = horas_para_minutos(sit["horas"])
                     horasInt = horasIntinmin / 60
-                    total_Extras += horasInt
-                    if dia["data"] not in datas_Extras_nAut:
-                        datas_Extras_nAut.append([dia["data"], dia["dia_semana"], dia["marcacoes"], sit["codigo"], sit["horas"], sit["descricao"]]) 
-    
-                elif sit["codigo"] in set_301_336:
-                    horasIntinmin = horas_para_minutos(sit["horas"])
-                    horasInt = horasIntinmin / 60
-                    total_Extras += horasInt
+                    total_Extras += horasInt 
 
                 elif sit["codigo"] in {"698", "699"}:
                     horasIntinmin = horas_para_minutos(sit["horas"])
                     horasInt = horasIntinmin / 60
                     total_Extras -= horasInt
-
-                elif sit["codigo"] in set_351_390:
-                    if sit["horas"] == "DSR":
-                        if dia["data"] not in datas_Extras_nAut:
-                            datas_Extras_nAut.append([dia["data"], dia["dia_semana"], dia["marcacoes"], sit["codigo"], sit["horas"], sit["descricao"]])
-                         
-                    else:
-                        horasIntinmin = horas_para_minutos(sit["horas"])
-                        horasInt = horasIntinmin / 60
-                        total_Extras += horasInt
-                        if dia["data"] not in datas_Extras_nAut:
-                            datas_Extras_nAut.append([dia["data"], dia["dia_semana"], dia["marcacoes"], sit["codigo"], sit["horas"], sit["descricao"]])
-                      
-                elif sit["codigo"] == "DSR":
-                    continue
                 
                 if sit["codigo"] in set_descanso: trabalhado_hoje = True
         
@@ -119,7 +90,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                     dias_sequencia += 1
                                   
                 if ((data_atual - data_anterior) != timedelta(days=1)) or (index_atual >= len(empregado["dias_trabalho"]) - 1) or not trabalhado_hoje:
-                    if dias_sequencia > 5:
+                    if (dias_sequencia + 1) > 6:
                         data_final = data_atual if (index_atual >= len(empregado["dias_trabalho"]) - 1) else data_anterior
                         
                         datas_sem_descanso.append(((data_final-timedelta(days=(dias_sequencia))).strftime("%d/%m/%Y"), data_final.strftime("%d/%m/%Y"), dias_sequencia + 1))
@@ -132,7 +103,8 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
             trabalhado_ontem = trabalhado_hoje
 
 
-        if total_Extras >= 10: # B: Alterar dependendo de quantas semanas faz desde o inicio do ponto.
+        # B: Alterar número mínimo dependendo de quantas semanas faz desde o início do ponto.
+        if total_Extras >= 10: 
           ops.append(1)
 
         if datas_sem_descanso:
@@ -179,7 +151,6 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                 primeiro_ponto_outro=datas_interjor[-1][5][0]if 3 in ops else "",
                 interjornadas=datas_interjor if 3 in ops else None,
                 datas_sem_descanso = datas_sem_descanso if 2 in ops else None,
-                horas_extras_nao_autorizadas=datas_Extras_nAut,
                 ops=ops
             ))
 
@@ -199,7 +170,6 @@ for func in funcionarios:
 
 
 # Agora processa cada liderança separadamente
-trava = 0
 for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     print(f"\n{'='*50}")
     print(f"{funcionarios_deste_lider}")
@@ -274,10 +244,6 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     else:
         print(f"⚠️  Nenhum email enviado para liderança: {lider}")
 
-    trava += 1
-
-    if trava > 5:
-        break
 
 print(f"\n{'='*50}")
 print("RESUMO DO PROCESSAMENTO:")

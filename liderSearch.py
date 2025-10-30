@@ -1,7 +1,4 @@
 from pathlib import Path
-
-#file_path = Path(r"C:\Users\GARCIACUNHABERNARDO\OneDrive - TK Elevator\Documents\Email-automação-novo\Email-Automate-System\Ativos com liderança 20102025 limpo.xlsx")
-
 import pandas as pd
 import json
 

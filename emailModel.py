@@ -23,7 +23,7 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
     interjornadas = funcionario.get('interjornadas', [])
     datas_sem_descanso = funcionario.get('datas_sem_descanso', [])
     
-    # ===== SEÇÃO 1: COMPENSAÇÃO BANCO DE HORAS (OP 1) =====
+    # Seção de horas extras (op 1)
     secao_compensacao = ""
     if 1 in ops:
         HorasPendentes = funcionario.get('HorasPendentes', '')
@@ -53,6 +53,7 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
         </div>
         """
 
+    # Seção de descanso semanal (op 2)
     secao_descanso = ""
     if 2 in ops:
         tabela_dias_sequencia = ""
@@ -94,7 +95,7 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
         </div>
         """
     
-    # ===== SEÇÃO 2: INTERJORNADA (OP 3) =====
+    # Seção interjornada (op 3)
     secao_interjornada = ""
     if 3 in ops:
         tabela_interjornadas = ""
@@ -194,6 +195,7 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
     
     # HTML completo
     html = f"""
+    
 <!DOCTYPE html>
 <html>
 <head>
