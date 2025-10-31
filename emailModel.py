@@ -43,12 +43,11 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
             <div class="data-item">
                 <span class="data-label">Data para fechamento da folha:</span>
                 <span class="data-value">{Fechamento_folha}</span>
-                <span class="status status-interjornada"></span>
             </div>
             
             <div class="data-item">
-                <span class="data-label">Ordem:</span>
-                <span class="data-value">Caso o colaborador tenha jornada flex, solicitamos informar quais serão os planos de compensação para esses acumulados.</span>
+                
+                <span class="data-value"><b>Ordem:</b> Caso o colaborador tenha jornada flex, solicitamos informar quais serão os planos de compensação para esses acumulados.</span>
             </div>
         </div>
         """
@@ -64,8 +63,8 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
             
             tabela_dias_sequencia += f"""
             <div class="data-item">
-                <span class="data-label"> Início: {data_inicio_descanso}, Fim:{data_fim_descanso}</span>
-                <span class="status status-outro">{total_dias} dias em sequência</span>
+                <span class="data-label"> Início: {data_inicio_descanso},<br> Fim: {data_fim_descanso}</span>
+                <span class="status status-outro">  {total_dias} dias seguidos</span>
             </div>
             """
         
@@ -105,11 +104,12 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
             data_fim = inter[3]
             marcacoes_fim = inter[5]
             diferenca = inter[-1]
+
             tabela_interjornadas += f"""
-            <div class="data-item">
-                <span class="data-label">{data_inicio} ({marcacoes_inicio})</span>
-                <span class="data-value">→ {data_fim} ({marcacoes_fim})</span>
-                <span class="status status-outro">{diferenca}h</span>
+            <div class="data-list">
+                <p class="data-label">{data_inicio} | {marcacoes_inicio}</p>
+                <p class="data-value">→ {data_fim} | {marcacoes_fim}</p>
+                <p class="status status-outro" style="width: 105px;">Diferença: {diferenca}h</p>
             </div>
             """
         
@@ -134,6 +134,9 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
 
             <div style="margin-top: 15px;">
                 <h4 style="margin-bottom: 10px;">Ocorrências Identificadas:</h4>
+                <div class="data-list" id="legenda">
+                    <p class="data-label">Data | Batidas do Ponto</p>
+                </div>
                 {tabela_interjornadas if tabela_interjornadas else "<p>Nenhuma ocorrência de interjornada identificada.</p>"}
             </div>
         </div>
@@ -195,7 +198,7 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
     
     # HTML completo
     html = f"""
-    
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -210,6 +213,13 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
             padding: 20px;
             background-color: #f5f5f5;
         }}
+
+        p {{
+            margin: 5px;
+            border: 5px;
+
+        }}
+
         .container {{
             max-width: 100%;
             margin: 0 auto;
@@ -245,6 +255,23 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
             border-radius: 3px;
             border: 1px solid #eaeaea;
         }}
+
+        .data-list {{
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 3px;
+            border: 1px solid #eaeaea;
+        }}
+
+        #legenda {{
+            padding: 5px;
+        }}
+
         .data-label {{
             font-weight: bold;
             color: #2c3e50;
@@ -262,6 +289,7 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
             background: #d5edda;
             color: #155724;
         }}
+
         .status-outro {{
             background: #f8d7da;
             color: #721c24;
@@ -279,16 +307,6 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
         }}
         
         /* CONTAINER HORIZONTAL COM SCROLL */
-        .overflow-box {{
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-            padding: 20px;
-            overflow-x: auto;
-            align-items: flex-start;
-            scroll-behavior: smooth;
-        }}
-        
         .Employebox {{
             flex: 0 0 auto;
             width: 400px;

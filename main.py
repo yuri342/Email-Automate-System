@@ -5,6 +5,7 @@ import re
 from datetime import datetime
 from datetime import datetime, timedelta
 from services import *
+from premailer import transform
 
 funcionariosEnviados = []
 lideresEnviados = []
@@ -93,6 +94,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                     if (dias_sequencia + 1) > 6:
                         data_final = data_atual if (index_atual >= len(empregado["dias_trabalho"]) - 1) else data_anterior
                         
+                        # B: Faz append de uma tupla com o dia de início da sequência, dia final e total de dias seguidos.
                         datas_sem_descanso.append(((data_final-timedelta(days=(dias_sequencia))).strftime("%d/%m/%Y"), data_final.strftime("%d/%m/%Y"), dias_sequencia + 1))
                     dias_sequencia = 0
             except:
@@ -167,8 +169,9 @@ for func in funcionarios:
         if (lider not in lider_manual) and lider:
             lider_manual.add(lider)
 
-# Agora processa cada liderança separadamente
 planilha_final = f"{datetime.now().strftime("%d-%m-%Y %H-%M-%S")}.xlsx"
+
+# Agora processa cada liderança separadamente
 for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     # Limpar o nome do líder para busca de email
     if lider is not None and lider != "":
@@ -185,13 +188,16 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
         funcionarios=funcionarios_deste_lider
     )
     
+    # B: Coloca o CSS no formato inline para ser melhor lido pelo Outlook.
+    bodye_inline = transform(bodye, disable_validation=True)
+
     sucesso = False
     try:
         # Primeiro tenta enviar usando o nome
         enviar_email_outlook(
             destinatario=lider,
             assunto="Relatório de Horas Extras",
-            corpo=bodye,
+            corpo=bodye_inline,
             cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
             enviar_automatico=True if lider not in lider_manual else False
         )
@@ -209,7 +215,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
             enviar_email_outlook(
                 destinatario=email,
                 assunto="Relatório de Horas Extras",
-                corpo=bodye,
+                corpo=bodye_inline,
                 cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
                 enviar_automatico=True if lider not in lider_manual else False
             )
