@@ -84,7 +84,7 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
             </div>
 
             <div class="situacao-box situacao-outro">
-                <p style="text-align: justify;">Verifica-se que não está sendo observado o limite de 6 dias de trabalho consecutivos. Essa prática configura descumprimento da legislação trabalhista, podendo resultar em autuações e passivos para a empresa</p>
+                <p style="text-align: justify;">Verifica-se que não está sendo observado o limite de 6 (seis) dias de trabalho consecutivos. Essa prática configura descumprimento da legislação trabalhista, podendo resultar em autuações e passivos para a empresa.</p>
             </div>
 
             <div style="margin-top: 15px;">
@@ -129,7 +129,7 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
             </div>
 
             <div class="situacao-box situacao-outro">
-                <p style="text-align: justify;">Verifica-se que não está sendo observado o intervalo mínimo de 11 (onze) horas consecutivas entre o término de uma jornada e o início da seguinte, conforme dispõe o artigo 66 da CLT. Essa prática configura descumprimento da legislação trabalhista, podendo resultar em autuações e passivos para a empresa</p>
+                <p style="text-align: justify;">Verifica-se que não está sendo observado o intervalo mínimo de 11 (onze) horas consecutivas entre o término de uma jornada e o início da seguinte, conforme dispõe o artigo 66 da CLT. Essa prática configura descumprimento da legislação trabalhista, podendo resultar em autuações e passivos para a empresa.</p>
             </div>
 
             <div style="margin-top: 15px;">
@@ -344,12 +344,10 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
         </div>
 
         <!-- Saudação -->
-        <p>Prezada Liderança,</p>
+        <p>Prezada liderança,</p>
         
         <p>
-            Em continuidade às análises de ponto dos colaboradores, informo que, neste mês,
-            iniciamos uma avaliação mais criteriosa com o objetivo de apoiar as lideranças
-            no acompanhamento da jornada de seus colaboradores. Verificamos, no período de <b>{periodo}</b>, a ocorrência
+            Em continuidade às análises de ponto dos colaboradores, verificamos, no período de <b>{periodo}</b>, a ocorrência
             das irregularidades dos seguintes colaboradores:
         </p>
 
@@ -361,8 +359,8 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
         <!-- Observações -->
         <div class="observacoes" style="background-color: #e6e6e6;">
             <h3 style="margin-top: 0;">📝 Observações:</h3>
-            <p>• Esta apuração será verificada para auditar as ordens requisitadas</p>
-            <p>• Casos especiais devem ser compensados conforme acordo ou suas devidas rotinas e OS's</p>
+            <p>• Esta apuração será verificada para auditar as ordens requisitadas.</p>
+            <p>• Casos especiais devem ser compensados conforme acordo ou suas devidas rotinas e OS's.</p>
             <p>• Este é um e-mail automático. Por favor, nos avise em caso de erros ou divergências.</p>
             <p>• Tenha em mente que compensação aplica-se apenas às jornadas flex.</p>
 
