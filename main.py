@@ -10,7 +10,7 @@ from premailer import transform
 funcionariosEnviados = []
 lideresEnviados = []
 funcionarios = []
-jsonArq = pathlib.Path(r"projetos10.json")
+jsonArq = pathlib.Path(r"projetos11.json")
 
 func_manual = set()
 lider_manual = set()
@@ -36,10 +36,9 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
         cargo = buscar_cargo_viaAtivo(nome, ativo)
 
         try:
-            if cargo.split()[0] != "TECNICO":
+            if (len(cargo.split()) < 2) or (cargo.split()[0] != "TECNICO" and cargo.split()[1] != "SERVICOS"):
                 continue
-        except:
-            pass
+        except: pass
 
         # B: Itera sobre cada dia de trabalho.
         for dia in empregado["dias_trabalho"]:
@@ -100,13 +99,12 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
             except:
                 pass
 
-            
             data_anterior = data_atual
             trabalhado_ontem = trabalhado_hoje
 
 
         # B: Alterar número mínimo dependendo de quantas semanas faz desde o início do ponto.
-        if total_Extras >= 10: 
+        if total_Extras >= 5:
           ops.append(1)
 
         if datas_sem_descanso:
@@ -116,27 +114,11 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
             ops.append(3)
         
 
-        #print_relatorio_dinamico(total_Extras, datas_Extras_nAut, datas_interjor, nome, horario, ops)
-# Gerar email apenas se houver irregularidades
+        # Gerar email apenas se houver irregularidades
         if len(ops) > 0:
             from datetime import date, timedelta
-            hoje = "03/11/2025"
+            hoje = "17/11/2025"
             amanha = date.today() + timedelta(days=1)
-
-            # bodye = construir_email_body(
-            #     nome_colaborador=nome,
-            #     periodo=f"11/{empregados["mes"]}/2025 á {hoje}",  # Usar mês do JSON
-            #     HorasPendentes=str(total_Extras),
-            #     Fechamento_folha="10/10/2025",
-            #     data_inicio=datas_interjor[0][0]if 3 in ops else "",
-            #     data_final=datas_interjor[-1][-4]if 3 in ops else "",
-            #     ultimo_Ponto=datas_interjor[0][2][-1]if 3 in ops else "",
-            #     primeiro_ponto_outro=datas_interjor[-1][5][0]if 3 in ops else "",
-            #     interjornadas=datas_interjor if 3 in ops else None,
-            #     horas_extras_nao_autorizadas=datas_Extras_nAut,
-            #     ops=ops
-            # )
-
             
             lider = buscar_gerente_viaAtivo(nome, ativo)
 
@@ -145,7 +127,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                 nome_colaborador=nome,
                 cargo_colaborador=cargo,
                 HorasPendentes=str(total_Extras),
-                Fechamento_folha="10/11/2025",
+                Fechamento_folha="10/12/2025",
                 data_inicio=datas_interjor[0][0]if 3 in ops else "",
                 data_final=datas_interjor[-1][-4]if 3 in ops else "",
                 ultimo_Ponto=datas_interjor[0][2][-1]if 3 in ops else "",
@@ -184,7 +166,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     
     # Construir corpo do email apenas com os funcionários desta liderança
     bodye = construir_email_body_multiplos_funcionarios(
-        periodo=f"11/10 A 25/10",
+        periodo=f"11/11 A 16/10",
         funcionarios=funcionarios_deste_lider
     )
     

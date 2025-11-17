@@ -3,7 +3,7 @@ import re
 from pathlib import Path as path
 import json
  
-pdf = path(r"relatorio 5077 a 5066 11-10_25-10.pdf")
+pdf = path(r"relatorio 5034 a 5077 11-11_16-11.PDF")
 #json_data = path(r"ModeloEmail\dados.json")
  
  
@@ -132,7 +132,7 @@ with pdfplumber.open(pdf) as pdf:
        
         # Divide o texto em linhas e ignora as primeiras N
         linhas = texto_completo.split('\n')
-        linhas_filtradas = linhas[6:-1]  # Ignora as 6 primeiras linhas
+        linhas_filtradas = linhas[5:-1]  # Ignora as 6 primeiras linhas
  
         # Processo de pegar funcionario dados.
         for linha in linhas_filtradas:
@@ -164,6 +164,12 @@ with pdfplumber.open(pdf) as pdf:
                     # ✅ ADICIONE ESTA LINHA - Marcar ID como adicionado
                     ids.add(id)
  
+            # B: Caso encontre o final do pdf, adiciona as situações do último funcionário.
+            if ((linha.split()[0]).casefold() == "Total".casefold()) and ((linha.split()[1]).casefold() == "Geral:".casefold()):
+                for sit in situacao:
+                    adicionar_situacao(funcionario_atual["dias_trabalho"][-1], sit[0], sit[1], sit[2])
+            
+
             # B: Ignora quando chega no total do colaborador.
             if ((linha.split()[0]).casefold() == "Total".casefold()) and ((linha.split()[1]).casefold() == "Colaborador:".casefold()):
                 total_colab = True
@@ -223,13 +229,6 @@ with pdfplumber.open(pdf) as pdf:
                 funcionario_atual["turma"] = turma
                 funcionario_atual["horarioId"] = horarioId
                 funcionario_atual["horario"] = horario
-
-
-            # B: Caso encontre o final do pdf, adiciona as situações do último funcionário.
-            if ((linha.split()[0]).casefold() == "Total".casefold()) and ((linha.split()[1]).casefold() == "Geral:".casefold()):
-                for sit in situacao:
-                    adicionar_situacao(funcionario_atual["dias_trabalho"][-1], sit[0], sit[1], sit[2])
-                
 
             dataAnterior = data
 

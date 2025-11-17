@@ -25,7 +25,7 @@ set_horas_extras = {"601", "602", "603", "604", "605", "606", "607", "608", "609
 set_extra_sobreaviso = {"501", "502", "503", "504", "505", "506", "507", "508", "511", "512", 
                         "513", "514", "516", "517", "519", "520", "521", "522", "525"}
 
-set_descanso = set_horas_extras.union(set_extra_sobreaviso, {"001"})
+set_descanso = set_horas_extras.union(set_extra_sobreaviso, {"001", "051", "999"})
 
 
 def montar_funcionario(lider, nome_colaborador, cargo_colaborador="", HorasPendentes="", Fechamento_folha="", 
