@@ -1,11 +1,17 @@
 import pathlib
 from emailModel import construir_email_body_multiplos_funcionarios
+import pandas as pd
 import json
 import re
 from datetime import datetime
 from datetime import datetime, timedelta
 from services import *
 from premailer import transform
+import sys
+
+start = input("Você iniciou o main do Email-Automate-System. Certeza que gostaria de rodar? ")
+if start in ["N".casefold(), "No".casefold(), "Não".casefold()]:
+    sys.exist(0)
 
 funcionariosEnviados = []
 lideresEnviados = []
@@ -32,7 +38,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
         horario = empregado["horario"]
 
         # Ignora quem não for técnico.
-        ativo = pathlib.Path(r"lideranca.json")
+        ativo = pathlib.Path(r"arquivos\lideranca.json")
         cargo = buscar_cargo_viaAtivo(nome, ativo)
 
         try:
@@ -104,7 +110,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
 
 
         # B: Alterar número mínimo dependendo de quantas semanas faz desde o início do ponto.
-        if total_Extras >= 5:
+        if total_Extras >= 15:
           ops.append(1)
 
         if datas_sem_descanso:
@@ -117,8 +123,6 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
         # Gerar email apenas se houver irregularidades
         if len(ops) > 0:
             from datetime import date, timedelta
-            hoje = "17/11/2025"
-            amanha = date.today() + timedelta(days=1)
             
             lider = buscar_gerente_viaAtivo(nome, ativo)
 
@@ -151,9 +155,9 @@ for func in funcionarios:
         if (lider not in lider_manual) and lider:
             lider_manual.add(lider)
 
-planilha_final = f"{datetime.now().strftime("%d-%m-%Y %H-%M-%S")}.xlsx"
 
 # Agora processa cada liderança separadamente
+enviados = []
 for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     # Limpar o nome do líder para busca de email
     if lider is not None and lider != "":
@@ -166,7 +170,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     
     # Construir corpo do email apenas com os funcionários desta liderança
     bodye = construir_email_body_multiplos_funcionarios(
-        periodo=f"11/11 A 16/10",
+        periodo=f"11/11 A 30/11",
         funcionarios=funcionarios_deste_lider
     )
     
@@ -180,11 +184,10 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
             destinatario=lider,
             assunto="Relatório de Horas Extras",
             corpo=bodye_inline,
-            cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
+            cc=["maicon.borba@tkelevator.com", "fernanda.barboza@tkelevator.com", "yuri.souza@tkelevator.com"],
             enviar_automatico=True if lider not in lider_manual else False
         )
         sucesso = True
-        print(f"✅ Email aberto para envio manual: {lider}")
         
     except Exception as e:
         print(f"❌ Falha ao enviar para {lider} pelo nome: {e}")
@@ -198,7 +201,7 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
                 destinatario=email,
                 assunto="Relatório de Horas Extras",
                 corpo=bodye_inline,
-                cc=["maicon.borba@tkelevator.com", "yuri.souza@tkelevator.com"],
+                cc=["maicon.borba@tkelevator.com", "fernanda.barboza@tkelevator.com", "yuri.souza@tkelevator.com"],
                 enviar_automatico=True if lider not in lider_manual else False
             )
             sucesso = True
@@ -211,12 +214,18 @@ for lider, funcionarios_deste_lider in funcionarios_por_lider.items():
     # Se algum envio funcionou, registra na planilha
     if sucesso:
         # Registrar todos os funcionários desta liderança
-        for func in funcionarios_deste_lider:
-            nome_funcionario = func['nome_colaborador']
-            funcionariosEnviados.append(nome_funcionario)
-            adicionar_registro_planilha(nome_funcionario, lider, planilha_final)
-        
-        lideresEnviados.append(lider)
-       
+        try:
+            for func in funcionarios_deste_lider:
+                nome_funcionario = func['nome_colaborador']
+                enviados.append({"Empregado": nome_funcionario, "Lider": lider})
+        except:
+            print(f"****Problema em adicionar lider na lista: Líder: {lider}, Funcionário: {nome_funcionario}****")
 
+# B: Adicionar registros na planilha final.
+nome_arquivo_final = datetime.now().strftime('%d-%m-%Y %H-%M-%S') + '.xlsx'
+try:
+    df_final = pd.DataFrame(enviados)
+except Exception as Exception_Planilha:
+    print("Erro na planilha final:", Exception_Planilha)
 
+df_final.to_excel(nome_arquivo_final, index=False, engine='openpyxl')
