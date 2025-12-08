@@ -1,7 +1,5 @@
 import win32com.client
 import time
-import json
-import re
 import pandas as pd
 import os
 from datetime import datetime
@@ -25,7 +23,7 @@ set_horas_extras = {"601", "602", "603", "604", "605", "606", "607", "608", "609
 set_extra_sobreaviso = {"501", "502", "503", "504", "505", "506", "507", "508", "511", "512", 
                         "513", "514", "516", "517", "519", "520", "521", "522", "525"}
 
-set_descanso = set_horas_extras.union(set_extra_sobreaviso, {"001", "051", "999"})
+set_descanso = set_horas_extras.union(set_extra_sobreaviso, {"001", "051"})
 
 
 def montar_funcionario(lider, nome_colaborador, cargo_colaborador="", HorasPendentes="", Fechamento_folha="", 
@@ -203,7 +201,7 @@ def adicionar_registro_planilha(empregado, lider, nome_arquivo="relacao_empregad
 
 
 def enviar_email_outlook(destinatario, assunto, corpo, cc=None, anexo=None, 
-                         enviar_automatico=True, formato_html=True):
+                         enviar_automatico=False, formato_html=True):
     """
     Envia e-mail via Outlook - MODO MANUAL SE NÃO RESOLVER
 
@@ -319,20 +317,39 @@ def calcular_intervalo_datetime(horario1, horario2):
     }
 
 
-def buscar_gerente_viaAtivo(nome, ativopath):
-    with open(ativopath, 'r', encoding='utf-8') as arquivo:
-        ativos1 = json.load(arquivo)
-        for funcionario in ativos1:
-            if funcionario["Nome Funcionario"] == nome:
-                return funcionario["LIDER"]
+def buscar_lideranca(matricula, ativo_arq):
+    """
+    Busca informações do líder do funcionário
+    
+    Args:
+        id: matrícula do funcionário
+        ativo_arq: dicionário com os dados da lista de ativos
+
+    returns:
+        lider_id: 8ID do lider
+        lider_matricula: matrícula do lide
+        lider_nome: nome do lider
+    """
+    #print(ativo_arq[str(matricula)]["8ID Lider"], ativo_arq[str(matricula)]["Matricula Lider"], ativo_arq[str(matricula)]["Lider"])
+    
+    if (str(matricula) in ativo_arq) and (ativo_arq[str(matricula)]["8ID Lider"] != 0):
+        
+        return ativo_arq[str(matricula)]["8ID Lider"], ativo_arq[str(matricula)]["Matricula Lider"], ativo_arq[str(matricula)]["Lider"]
+        
+    return None
+
+def buscar_matricula_gerente_viaAtivo(id, ativo_arq):
+
+    if str(id) in ativo_arq:
+        return ativo_arq[str(id)]["Matricula Lider"]
+           
     return None
         
-def buscar_cargo_viaAtivo(nome, ativopath):
-    with open(ativopath, 'r', encoding='utf-8') as arquivo:
-        ativos1 = json.load(arquivo)
-        for funcionario in ativos1:
-            if funcionario["Nome Funcionario"] == nome:
-                return funcionario["Cargo"]
+def buscar_cargo_viaAtivo(id, ativo_arq):
+        
+    if str(id) in ativo_arq:
+        return ativo_arq[str(id)]["Cargo"]
+
     return None
     
 

@@ -1,34 +1,17 @@
-def subtrair_horarios(horario1, horario2):
-    h1, m1 = map(int, horario1.split(':'))
-    h2, m2 = map(int, horario2.split(':'))
-    
-    # Converter tudo para minutos
-    total_minutos1 = h1 * 60 + m1
-    total_minutos2 = h2 * 60 + m2
-    
-    # Subtrair
-    diferenca_minutos = total_minutos1 - total_minutos2
-    
-    # Converter de volta para horas e minutos
-    horas = diferenca_minutos // 60
-    minutos = diferenca_minutos % 60
-    
-    return horas, minutos
-
-def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
+def gerar_funcionario_html(funcionario: object, periodo: str) -> str:
     """
     Gera o HTML para um único funcionário
     """
-    ops = funcionario.get('ops', [])
-    interjornadas = funcionario.get('interjornadas', [])
-    datas_sem_descanso = funcionario.get('datas_sem_descanso', [])
+    ops = funcionario.ops
+    interjornadas = funcionario.datas_interjornada
+    datas_sem_descanso = funcionario.datas_sem_descanso
     
     # Seção de horas extras (op 1)
     secao_compensacao = ""
     if 1 in ops:
-        HorasPendentes = funcionario.get('HorasPendentes', '')
+        HorasPendentes = funcionario.horas_extras
         HorasPendentestrimed = HorasPendentes[:4] if HorasPendentes else ""
-        Fechamento_folha = funcionario.get('Fechamento_folha', '')
+        Fechamento_folha = "10/12/2025"
         
         secao_compensacao = f"""
         <div class="situacao-box situacao-interjornada">
@@ -143,8 +126,8 @@ def gerar_funcionario_html(funcionario: dict, periodo: str) -> str:
         """
     
     # HTML do funcionário
-    nome_colaborador = funcionario.get('nome_colaborador', '')
-    cargo_colaborador = funcionario.get('cargo_colaborador', '')
+    nome_colaborador = funcionario.nome
+    cargo_colaborador = funcionario.cargo
     
     return f"""
     <div class="Employebox texto-controlado">
