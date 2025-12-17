@@ -327,10 +327,9 @@ def buscar_lideranca(matricula, ativo_arq):
 
     returns:
         lider_id: 8ID do lider
-        lider_matricula: matrícula do lide
+        lider_matricula: matrícula do lider
         lider_nome: nome do lider
     """
-    #print(ativo_arq[str(matricula)]["8ID Lider"], ativo_arq[str(matricula)]["Matricula Lider"], ativo_arq[str(matricula)]["Lider"])
     
     if (str(matricula) in ativo_arq) and (ativo_arq[str(matricula)]["8ID Lider"] != 0):
         
@@ -338,12 +337,42 @@ def buscar_lideranca(matricula, ativo_arq):
         
     return None
 
-def buscar_matricula_gerente_viaAtivo(id, ativo_arq):
+def buscar_gerente_viaAtivo(id, ativo_arq):
 
-    if str(id) in ativo_arq:
-        return ativo_arq[str(id)]["Matricula Lider"]
-           
-    return None
+    """
+    Busca informações do gerente do funcionário.
+    
+    Args:
+        id: matrícula do funcionário
+        ativo_arq: dicionário com os dados da lista de ativos
+
+    returns:
+        lider_id: 8ID do lider
+        lider_matricula: matrícula do lider
+        lider_nome: nome do lider
+    """
+    try:
+        lider_direto_id, lider_direto_matricula, lider_direto_nome = buscar_lideranca(id, ativo_arq)
+    except:
+        return None
+    
+    lider_cargo = buscar_cargo_viaAtivo(lider_direto_matricula, ativo_arq)
+
+    while lider_cargo.split()[0] != "GERENTE".casefold():
+        try:
+            lider_acima_id, lider_acima_matricula, lider_acima_nome = buscar_lideranca(lider_direto_matricula, ativo_arq)
+            lider_acima_cargo = buscar_cargo_viaAtivo(lider_acima_matricula, ativo_arq)
+
+            lider_cargo = lider_acima_cargo
+            lider_direto_id = lider_acima_id
+            lider_direto_matricula = lider_acima_matricula
+            lider_direto_nome = lider_acima_nome
+
+        except:
+            return None
+
+    return lider_direto_id, lider_direto_matricula, lider_direto_nome
+
         
 def buscar_cargo_viaAtivo(id, ativo_arq):
         

@@ -3,7 +3,7 @@ import re
 from pathlib import Path as path
 import json
 
-pdf = path(r"relatorio 5034 a 5077 11-11_30-11.PDF")
+pdf = path(r"relatorio 5004 a 5033 11-12_16-12.PDF")
 #json_data = path(r"ModeloEmail\dados.json")
  
  
@@ -107,7 +107,7 @@ def adicionar_situacao(dia_trabalho, codigo, descricao, horas):
 #pdf - Reader
  
 with pdfplumber.open(pdf) as pdf:
-    padraoid = r"\b\d{8}\b"
+    padraoid = r"\b\d{8,9}\b"
     padraoData = r"\b\d{2}/\d{2}\b"
     padraohora3 = r"\d{1,3}:\d{2}"
     padraohora2 = r"\d{2}:\d{2}"
@@ -120,13 +120,14 @@ with pdfplumber.open(pdf) as pdf:
     data = ''
     dataAnterior = ''
 
+    id = 0
     escala = 0  
     turma = 0 
     horarioId = 0 
     horario = 0 
     situacao = []
     total_colab = False
-
+    
     for numero_pagina, pagina in enumerate(pdf.pages):
         texto_completo = pagina.extract_text()
        
@@ -137,6 +138,7 @@ with pdfplumber.open(pdf) as pdf:
         # Processo de pegar funcionario dados.
         for linha in linhas_filtradas:
             if re.match(padraoid, linha) :
+                id_anterior = id
                 id = linha.split()[0]  # Primeiro elemento
                 nome = ' '.join(linha.split()[1:])  # Restante como nome
 
@@ -145,7 +147,7 @@ with pdfplumber.open(pdf) as pdf:
                 if not(id in ids) and ids:
                     for sit in situacao:
                         adicionar_situacao(funcionario_atual["dias_trabalho"][-1], sit[0], sit[1], sit[2])
-
+                       
                     escala = 0  
                     turma = 0 
                     horarioId = 0
@@ -165,22 +167,24 @@ with pdfplumber.open(pdf) as pdf:
  
             # B: Caso encontre o final do pdf, adiciona as situações do último funcionário.
             if ((linha.split()[0]).casefold() == "Total".casefold()) and ((linha.split()[1]).casefold() == "Geral:".casefold()):
-                for sit in situacao:
+                for sit in situacao:    
                     adicionar_situacao(funcionario_atual["dias_trabalho"][-1], sit[0], sit[1], sit[2])
             
 
             # B: Ignora quando chega no total do colaborador.
             if ((linha.split()[0]).casefold() == "Total".casefold()) and ((linha.split()[1]).casefold() == "Colaborador:".casefold()):
                 total_colab = True
-                
+                data = ''
+                dataAnterior = ''
+            
+            
             if total_colab and ids:
                 continue
-
 
             elif re.match(padraoData, linha):
                 # B: Pega os casos de mudança de página em que reaparece o mesmo dia com situações que não couberam
                 # na página anterior.
-                if (linha.split()[0] == dataAnterior) and (data != ''):
+                if (linha.split()[0] == dataAnterior) and (data != '') and (id_anterior == id):
                     linhaSit = ' '.join(linha.split()[2:])
                     situacaoUnit = linhaSit.split()
                     situacaoUnit[1:-1] = [' '.join(situacaoUnit[1:-1])]
@@ -190,9 +194,9 @@ with pdfplumber.open(pdf) as pdf:
                     try:
                         for sit in situacao:
                             adicionar_situacao(funcionario_atual["dias_trabalho"][-1], sit[0], sit[1], sit[2])
-                    except:
+                    except:           
                         pass
-
+              
                     data = linha.split()[0]  # Primeiro elemento
                     dia_semana = linha.split()[1]  # Segundo elemento
                     marcacoes = ' '.join(linha.split()[2:])  # Restante como marcações
@@ -205,6 +209,7 @@ with pdfplumber.open(pdf) as pdf:
                     situacaoUnit[1:-1] = [' '.join(situacaoUnit[1:-1])]            
 
                     situacao = []
+        
                     situacao.append(situacaoUnit)
                     
                     adicionar_dia_trabalho(funcionario_atual, data, dia_semana, marcacoes)
@@ -242,6 +247,6 @@ dados_json = {
     "ultima_atualizacao": time.time()
 }
  
-with open("projetos"+str(mest)+".json", "w", encoding="utf-8") as arquivo:
+with open("reporte_dezembro.json", "w", encoding="utf-8") as arquivo:
     json.dump(dados_json, arquivo, ensure_ascii=False, indent=2)
  

@@ -18,7 +18,7 @@ ativo_path = pathlib.Path(r".\arquivos\lideranca_dict.json")
 with open(ativo_path, 'r', encoding='utf-8') as arquivo:
         ativos_dict = json.load(arquivo)
 
-email_path = pathlib.Path(r".\arquivos\emails nova versao - Copia.xlsx")
+email_path = pathlib.Path(r".\arquivos\emails.xlsx")
 df_email = pd.read_excel(email_path, sheet_name="Planilha1")
 
 funcionarios = []
@@ -46,7 +46,7 @@ class Funcionario:
 
 #----------------------------------------------------------------------------------------
 
-jsonArq = pathlib.Path(r"projetos11.json")
+jsonArq = pathlib.Path(r"reporte_dezembro.json")
 with open(jsonArq, 'r', encoding='utf-8') as arquivo:
     empregados = json.load(arquivo)
     # Itera sobre cada empregado do arquivo "projetosX.json"
@@ -191,9 +191,35 @@ except Exception as Exception_Planilha:
 
 # Itera sobre cada liderança para enviar o email.
 enviados = []
+email_gerente = None
 trava = 0
+
 for lider_id, funcionarios_deste_lider in dict_lider.items():
-    if trava > 2: break
+    email_gerente = None
+    try:        
+        lider_matricula = funcionarios_deste_lider[0].lider_matricula
+        lider_cargo_gerente = buscar_cargo_viaAtivo(lider_matricula, ativos_dict)
+       
+        while lider_cargo_gerente.split()[0].casefold() != "GERENTE".casefold():
+            #print(lider_cargo_gerente)
+            id_superior, superior_matricula, superior_nome = buscar_lideranca(lider_matricula, ativos_dict)
+
+            id_lider = id_superior
+            lider_matricula = superior_matricula
+            lider_cargo_gerente = buscar_cargo_viaAtivo(lider_matricula, ativos_dict)
+        
+        filtro = df_email.loc[df_email['ID'] == int(id_lider), 'Email']
+   
+        if not filtro.empty:
+            email_gerente = filtro.iloc[0]
+        else:
+            email_gerente = None
+            
+    except Exception as e: 
+        print("Erro gerente: ", e)
+        pass
+
+    if trava > 4: break
     trava += 1
     
     # Busca o e-mail do lider
@@ -206,12 +232,17 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
 
     # Construir corpo do email apenas com os funcionários desta liderança.
     bodye = construir_email_body_multiplos_funcionarios(
-        periodo=f"11/11 A 30/11",
+        periodo=f"11/12 A 30/01",
         funcionarios=funcionarios_deste_lider
     )
     
     # Coloca o CSS no formato inline para ser melhor lido pelo Outlook.
     bodye_inline = transform(bodye, disable_validation=True)
+
+    cc = ["maicon.borba@tkelevator.com", "fernanda.barboza@tkelevator.com", "yuri.souza@tkelevator.com"]
+    if email_gerente:
+        cc.append(email_gerente)
+
 
     sucesso = False
     try:
@@ -219,7 +250,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
             destinatario=email_lider,
             assunto="Relatório de Horas Extras",
             corpo=bodye_inline,
-            cc=["maicon.borba@tkelevator.com", "fernanda.barboza@tkelevator.com", "yuri.souza@tkelevator.com"],
+            cc=cc,
             #enviar_automatico=True if lider_id not in lider_manual else False
             enviar_automatico=False
         )
@@ -238,7 +269,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
                     destinatario=email_gal,
                     assunto="Relatório de Horas Extras",
                     corpo=bodye_inline,
-                    cc=["maicon.borba@tkelevator.com", "fernanda.barboza@tkelevator.com", "yuri.souza@tkelevator.com"],
+                    cc=cc,
                     #enviar_automatico=True if lider_id not in lider_manual else False
                     enviar_automatico=False
                 )
