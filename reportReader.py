@@ -3,7 +3,7 @@ import re
 from pathlib import Path as path
 import json
 
-pdf = path(r"relatorio 5004 a 5033 11-12_16-12.PDF")
+pdf = path(r"relatorio 5034 a 5077 11-12_16-12.PDF")
 #json_data = path(r"ModeloEmail\dados.json")
  
  

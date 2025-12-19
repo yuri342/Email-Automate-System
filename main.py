@@ -10,7 +10,7 @@ import sys
 
 start = input("Você iniciou o main do Email-Automate-System (atualização). Certeza que gostaria de rodar? ")
 if start in ["N".casefold(), "No".casefold(), "Não".casefold()]:
-    sys.exist(0)
+    sys.exit(0)
 
 # -------------------------------------------------------------------------------
 
@@ -192,7 +192,6 @@ except Exception as Exception_Planilha:
 # Itera sobre cada liderança para enviar o email.
 enviados = []
 email_gerente = None
-trava = 0
 
 for lider_id, funcionarios_deste_lider in dict_lider.items():
     email_gerente = None
@@ -219,8 +218,6 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
         print("Erro gerente: ", e)
         pass
 
-    if trava > 4: break
-    trava += 1
     
     # Busca o e-mail do lider
     filtro = df_email.loc[df_email['ID'] == int(lider_id), 'Email']
@@ -251,18 +248,17 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
             assunto="Relatório de Horas Extras",
             corpo=bodye_inline,
             cc=cc,
-            #enviar_automatico=True if lider_id not in lider_manual else False
-            enviar_automatico=False
+            enviar_automatico=True if lider_id not in lider_manual else False
         )
         sucesso = True
         
     except Exception as e:
-        print(f"❌ Falha ao enviar para {funcionarios[0].lider_nome} pelo nome: {e}")
+        print(f"❌ Falha ao enviar para {funcionarios_deste_lider[0].lider_nome} pelo nome: {e}")
         sucesso = False
    
     # Se houver problema, tenta novamente procurando o email na GAL.
     if not sucesso:
-        email_gal = buscar_email_na_gal(funcionarios[0].lider_nome)
+        email_gal = buscar_email_na_gal(funcionarios_deste_lider[0].lider_nome)
         if email_gal:
             try:
                 enviar_email_outlook(
@@ -270,8 +266,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
                     assunto="Relatório de Horas Extras",
                     corpo=bodye_inline,
                     cc=cc,
-                    #enviar_automatico=True if lider_id not in lider_manual else False
-                    enviar_automatico=False
+                    enviar_automatico=True if lider_id not in lider_manual else False
                 )
                 
                 sucesso = True
@@ -285,10 +280,10 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
     if sucesso:
         try:
             for func in funcionarios_deste_lider:
-                nome_funcionario = funcionario.nome
-                enviados.append({"Matricula": funcionario.matricula, "Empregado": nome_funcionario, "Lider": funcionario.lider_nome, "Lider Matricula": funcionario.lider_matricula})
+                nome_funcionario = func.nome
+                enviados.append({"Matricula": func.matricula, "Empregado": nome_funcionario, "Lider": func.lider_nome, "Lider Matricula": func.lider_matricula})
         except:
-            print(f"****Problema em adicionar lider na lista: Líder: {funcionarios[0].lider_nome}, Funcionário: {nome_funcionario}****")
+            print(f"****Problema em adicionar lider na lista: Líder: {funcionarios_deste_lider[0].lider_nome}****")
 
 # Adicionar registros na planilha final de enviados.
 nome_arquivo_enviados = "enviados_" + datetime.now().strftime('%d-%m-%Y %H-%M-%S') + '.xlsx'
