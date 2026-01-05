@@ -2,15 +2,29 @@ import pathlib
 from emailModel import construir_email_body_multiplos_funcionarios
 import pandas as pd
 import json
-from datetime import datetime
 from datetime import datetime, timedelta
 from arquivos.services import *
 from premailer import transform
 import sys
 
-start = input("Você iniciou o main do Email-Automate-System (atualização). Certeza que gostaria de rodar? ")
-if start in ["N".casefold(), "No".casefold(), "Não".casefold()]:
+aceito = False
+teste = False
+
+while aceito != True:
+    try:
+        start = int(input("Você iniciou o main do Email-Automate-System. Digite uma opção: \n - 1: Rodar o script \n - 2: Rodar em modo teste \n - 3: Cancelar \n Digite a opção: "))
+        aceito = True
+    except:
+        print("--- Opção não aceita, tente novamente ---\n")
+
+if start == 3:
+    print("Cancelando...")
     sys.exit(0)
+elif start == 2:
+    print("Rodando em modo teste.")
+    teste = True
+elif start == 1:
+    ("Rodando script.")
 
 # -------------------------------------------------------------------------------
 
@@ -46,7 +60,7 @@ class Funcionario:
 
 #----------------------------------------------------------------------------------------
 
-jsonArq = pathlib.Path(r"reporte_dezembro.json")
+jsonArq = pathlib.Path(r"report_janeiro.json")
 with open(jsonArq, 'r', encoding='utf-8') as arquivo:
     empregados = json.load(arquivo)
     # Itera sobre cada empregado do arquivo "projetosX.json"
@@ -193,7 +207,13 @@ except Exception as Exception_Planilha:
 enviados = []
 email_gerente = None
 
+trava = 0
+
 for lider_id, funcionarios_deste_lider in dict_lider.items():
+    
+    if trava>2 and teste: sys.exit(0)
+    trava += 1
+
     email_gerente = None
     try:        
         lider_matricula = funcionarios_deste_lider[0].lider_matricula
@@ -229,7 +249,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
 
     # Construir corpo do email apenas com os funcionários desta liderança.
     bodye = construir_email_body_multiplos_funcionarios(
-        periodo=f"11/12 A 30/01",
+        periodo=f"11/12 A 04/01",
         funcionarios=funcionarios_deste_lider
     )
     
@@ -237,6 +257,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
     bodye_inline = transform(bodye, disable_validation=True)
 
     cc = ["maicon.borba@tkelevator.com", "fernanda.barboza@tkelevator.com", "yuri.souza@tkelevator.com"]
+
     if email_gerente:
         cc.append(email_gerente)
 
@@ -248,7 +269,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
             assunto="Relatório de Horas Extras",
             corpo=bodye_inline,
             cc=cc,
-            enviar_automatico=True if lider_id not in lider_manual else False
+            enviar_automatico=True if lider_id not in lider_manual and not teste else False
         )
         sucesso = True
         
@@ -266,7 +287,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
                     assunto="Relatório de Horas Extras",
                     corpo=bodye_inline,
                     cc=cc,
-                    enviar_automatico=True if lider_id not in lider_manual else False
+                    enviar_automatico=True if lider_id not in lider_manual and not teste else False
                 )
                 
                 sucesso = True

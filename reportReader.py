@@ -3,7 +3,7 @@ import re
 from pathlib import Path as path
 import json
 
-pdf = path(r"relatorio 5034 a 5077 11-12_16-12.PDF")
+pdf = path(r"relatorio 5034 a 5077 11-12_04-01.PDF")
 #json_data = path(r"ModeloEmail\dados.json")
  
  
@@ -247,6 +247,6 @@ dados_json = {
     "ultima_atualizacao": time.time()
 }
  
-with open("reporte_dezembro.json", "w", encoding="utf-8") as arquivo:
+with open("report_janeiro.json", "w", encoding="utf-8") as arquivo:
     json.dump(dados_json, arquivo, ensure_ascii=False, indent=2)
  

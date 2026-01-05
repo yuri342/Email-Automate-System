@@ -44,7 +44,7 @@ def excel_to_json(file_path):
 # Exemplo de uso
 if __name__ == "__main__":
     # Substitua pelo caminho do seu arquivo
-    arquivo_excel = Path(r".\arquivos\Ativos com lideranças 17122025.xlsx")
+    arquivo_excel = Path(r".\arquivos\ATIVOS_05012025_BERNARDO.xlsx")
     
     try:
         json_resultado = excel_to_json(arquivo_excel)
@@ -53,9 +53,9 @@ if __name__ == "__main__":
         # Salvar em arquivo JSON
         with open("lideranca_dict.json", "w", encoding="utf-8") as f:
             f.write(json_resultado)
-        print("\nArquivo 'lideranca.json' salvo com sucesso!")
+        print("\nArquivo 'lideranca_dict.json' salvo com sucesso!")
         
     except FileNotFoundError:
         print(f"Erro: Arquivo '{arquivo_excel}' não encontrado.")
-    """except Exception as e:
-        print(f"Erro ao processar o arquivo: {e}")"""
+    except Exception as e:
+        print(f"Erro ao processar o arquivo: {e}")
