@@ -13,6 +13,10 @@ teste = False
 while aceito != True:
     try:
         start = int(input("Você iniciou o main do Email-Automate-System. Digite uma opção: \n - 1: Rodar o script \n - 2: Rodar em modo teste \n - 3: Cancelar \n Digite a opção: "))
+        
+        if (start >= 4) or (start <= 0):
+            raise Exception
+
         aceito = True
     except:
         print("--- Opção não aceita, tente novamente ---\n")
