@@ -3,7 +3,7 @@ import re
 from pathlib import Path as path
 import json
 
-pdf = path(r"relatorio 5034 a 5077 11-12_04-01.PDF")
+pdf = path(r"relatorios todos 11_01-03_02--2026.PDF")
 #json_data = path(r"ModeloEmail\dados.json")
  
  
@@ -133,7 +133,7 @@ with pdfplumber.open(pdf) as pdf:
        
         # Divide o texto em linhas e ignora as primeiras N
         linhas = texto_completo.split('\n')
-        linhas_filtradas = linhas[6:-1]  # Ignora as 6 primeiras linhas
+        linhas_filtradas = linhas[5:-1]  # Ignora as 5 primeiras linhas
  
         # Processo de pegar funcionario dados.
         for linha in linhas_filtradas:

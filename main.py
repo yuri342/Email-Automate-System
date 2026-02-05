@@ -28,7 +28,7 @@ elif start == 2:
     print("Rodando em modo teste.")
     teste = True
 elif start == 1:
-    ("Rodando script.")
+    print("Rodando script.")
 
 # -------------------------------------------------------------------------------
 
@@ -81,7 +81,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
         nome = empregado["nome"]
         horario = empregado["horario"]
         cargo = buscar_cargo_viaAtivo(matricula, ativos_dict)
-
+        
         # Testa se consegue encontrar líder.
         try:
             lider_id, lider_matricula, lider_nome  = buscar_lideranca(matricula, ativos_dict)
@@ -90,12 +90,6 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
             print("Problema ao processar lider de funcionário: ", nome, "/", matricula)
             lista_problemas.append({"Matricula": matricula, "Nome": nome})
             continue
-
-        # Ignora quem não for técnico.
-        try:
-            if (len(cargo.split()) < 2) or (cargo.split()[0] != "TECNICO" and cargo.split()[1] != "SERVICOS"):
-                continue
-        except: pass
 
         # Itera sobre cada dia de trabalho.
         for dia in empregado["dias_trabalho"]:
@@ -140,7 +134,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
         
 
             # Testa se o funcionário fez descanso semanal.
-            data_atual = datetime.strptime(f"{dia["data"]}/2025", "%d/%m/%Y")
+            data_atual = datetime.strptime(f"{dia["data"]}/2026", "%d/%m/%Y")
             
             try:
                 if data_atual - data_anterior == timedelta(days=1) and trabalhado_hoje and trabalhado_ontem:
@@ -161,7 +155,7 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
 
 
         # Alterar número mínimo dependendo de quantas semanas faz desde o início do ponto.
-        if total_Extras >= 5:
+        if total_Extras >= 15:
           ops.append(1)
 
         if datas_sem_descanso:
@@ -224,7 +218,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
         lider_cargo_gerente = buscar_cargo_viaAtivo(lider_matricula, ativos_dict)
        
         while lider_cargo_gerente.split()[0].casefold() != "GERENTE".casefold():
-            #print(lider_cargo_gerente)
+
             id_superior, superior_matricula, superior_nome = buscar_lideranca(lider_matricula, ativos_dict)
 
             id_lider = id_superior
@@ -253,7 +247,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
 
     # Construir corpo do email apenas com os funcionários desta liderança.
     bodye = construir_email_body_multiplos_funcionarios(
-        periodo=f"11/12 A 04/01",
+        periodo=f"11/01 A 03/02",
         funcionarios=funcionarios_deste_lider
     )
     
