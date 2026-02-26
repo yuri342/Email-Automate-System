@@ -3,7 +3,7 @@ import re
 from pathlib import Path as path
 import json
 
-pdf_path = path(r"relatorios todos 11_01-03_02--2026.PDF")
+pdf_path = path(r"relatorio 11_02-24_02--2026.PDF")
  
 def nao_e_hora(item):
     padrao_hora = r'^\d{3}:\d{2}$' # Exemplo: 123:45
@@ -69,9 +69,9 @@ with pdfplumber.open(pdf_path) as pdf:
 for inicio in range(0, total, BLOCO):
     with pdfplumber.open(pdf_path) as pdf:
         for i in range(inicio, min(inicio + BLOCO, total)):
-            #texto = pdf.pages[i].extract_text().split('\n')[6:-1]
+            #texto = pdf.pages[i].extract_text().split('\n')[5:-1]
             
-            for linha in pdf.pages[i].extract_text().split('\n')[5:-1]: # Ignora as 6 primeiras linhas
+            for linha in pdf.pages[i].extract_text().split('\n')[5:-1]: # Ignora as 5 primeiras linhas
                 if re.match(padraoid, linha) :
                     id_anterior = id
                     id = linha.split()[0]  # Primeiro elemento
@@ -181,6 +181,6 @@ dados_json = {
     "ultima_atualizacao": time.time()
 }
  
-with open("teste_leitura_todos.json", "w", encoding="utf-8") as arquivo:
+with open("reports_fevereiro.json", "w", encoding="utf-8") as arquivo:
     json.dump(dados_json, arquivo, ensure_ascii=False, indent=2)
  

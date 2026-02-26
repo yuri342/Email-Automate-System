@@ -11,7 +11,7 @@ def gerar_funcionario_html(funcionario: object, periodo: str) -> str:
     if 1 in ops:
         HorasPendentes = funcionario.horas_extras
         HorasPendentestrimed = HorasPendentes[:4] if HorasPendentes else ""
-        Fechamento_folha = "10/02/2026"
+        Fechamento_folha = "10/03/2026"
         
         secao_compensacao = f"""
         <div class="situacao-box situacao-interjornada">
@@ -24,7 +24,7 @@ def gerar_funcionario_html(funcionario: object, periodo: str) -> str:
             </div>
             
             <div class="data-item">
-                <span class="data-label">Data para fechamento da folha:</span>
+                <span class="data-label">Data para fechamento do ponto:</span>
                 <span class="data-value">{Fechamento_folha}</span>
             </div>
             
@@ -175,10 +175,28 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
     
     # Gerar HTML para cada funcionário
     funcionarios_html = ""
+    irregularidade = False
     for func in funcionarios:
+        if (2 in func.ops) or (3 in func.ops):
+            irregularidade = True
         funcionario_html = gerar_funcionario_html(func, periodo)
         funcionarios_html += funcionario_html
     
+    if irregularidade:
+        introducao = f"""
+        <p>        
+            Em continuidade às análises de ponto dos colaboradores, verificamos, no período de <b>{periodo}</b>, a ocorrência
+            das irregularidades dos seguintes colaboradores:
+        </p>                            
+        """
+    else:
+        introducao = f"""
+        <p>        
+            Em continuidade às análises de ponto dos colaboradores, verificamos, no período de <b>{periodo}</b>, a situação 
+            das horas extras realizadas dos seguintes colaboradores:
+        </p>                            
+        """
+
     # HTML completo
     html = f"""
 
@@ -329,10 +347,7 @@ def construir_email_body_multiplos_funcionarios(periodo: str, funcionarios: list
         <!-- Saudação -->
         <p>Prezada liderança,</p>
         
-        <p>
-            Em continuidade às análises de ponto dos colaboradores, verificamos, no período de <b>{periodo}</b>, a ocorrência
-            das irregularidades dos seguintes colaboradores:
-        </p>
+        {introducao}
 
         <!-- CONTAINER COM TODOS OS FUNCIONÁRIOS -->
         <div class="overflow-box">

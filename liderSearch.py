@@ -44,7 +44,7 @@ def excel_to_json(file_path):
 # Exemplo de uso
 if __name__ == "__main__":
     # Substitua pelo caminho do seu arquivo
-    arquivo_excel = Path(r".\arquivos\Ativos com liderança 26012026.xlsx")
+    arquivo_excel = Path(r".\arquivos\Ativos 25_02_2026.xlsx")
     
     try:
         json_resultado = excel_to_json(arquivo_excel)

@@ -380,6 +380,12 @@ def buscar_cargo_viaAtivo(id, ativo_arq):
         return ativo_arq[str(id)]["Cargo"]
 
     return None
+
+
+def buscar_cc_viaAtivo(matricula, ativo_arq):
+    
+    if str(matricula) in ativo_arq:
+        return ativo_arq[str(matricula)]["Centro de Custo"]
     
 
 def diferenca_dias(data1, data2):

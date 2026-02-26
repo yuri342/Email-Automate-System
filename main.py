@@ -64,7 +64,7 @@ class Funcionario:
 
 #----------------------------------------------------------------------------------------
 
-jsonArq = pathlib.Path(r"report_janeiro.json")
+jsonArq = pathlib.Path(r"reports_fevereiro.json")
 with open(jsonArq, 'r', encoding='utf-8') as arquivo:
     empregados = json.load(arquivo)
     # Itera sobre cada empregado do arquivo "projetosX.json"
@@ -209,35 +209,62 @@ trava = 0
 
 for lider_id, funcionarios_deste_lider in dict_lider.items():
     
+    try:
+        # Verifica se o centro de custo da liderança direta é o que deve ser ignorado. Se for, não envia e-mail.
+        lider_matricula = funcionarios_deste_lider[0].lider_matricula
+        lider_cc = buscar_cc_viaAtivo(lider_matricula, ativos_dict)
+        print("Centro de custo do líder: ", lider_cc)
+        if int(lider_cc) == 999999999:
+            continue
+    except:
+        print(f"Problema no centro de custo, lider_matricula: {lider_matricula}")
+
+    # Trava para usar o modo de teste
     if trava>2 and teste: sys.exit(0)
     trava += 1
 
     email_gerente = None
-    try:        
-        lider_matricula = funcionarios_deste_lider[0].lider_matricula
+    try:
+        # Busca cargo do líder direto
         lider_cargo_gerente = buscar_cargo_viaAtivo(lider_matricula, ativos_dict)
-       
-        while lider_cargo_gerente.split()[0].casefold() != "GERENTE".casefold():
 
-            id_superior, superior_matricula, superior_nome = buscar_lideranca(lider_matricula, ativos_dict)
-
-            id_lider = id_superior
-            lider_matricula = superior_matricula
-            lider_cargo_gerente = buscar_cargo_viaAtivo(lider_matricula, ativos_dict)
+        # Verifica se o líder direto é gerente. Se for, lança exceção para ignorar busca do e-mail de gerente
+        if lider_cargo_gerente.split()[0].casefold() == "GERENTE".casefold():
+            raise Exception("Líder direto já é gerente.")
         
-        filtro = df_email.loc[df_email['ID'] == int(id_lider), 'Email']
+        # Dado que a liderança direta não é gerente, se busca o gerente subindo na hierarquia em loop
+        lider_matricula_gerente = lider_matricula
+        while lider_cargo_gerente.split()[0].casefold() != "GERENTE".casefold():
+            id_superior, superior_matricula, superior_nome = buscar_lideranca(lider_matricula_gerente, ativos_dict)
+
+            lider_id_gerente = id_superior
+            lider_matricula_gerente = superior_matricula
+            lider_cargo_gerente = buscar_cargo_viaAtivo(lider_matricula_gerente, ativos_dict)
+        
+        ignorar_gerente = False
+        try:
+            # Verifica se o centro de custo do gerente é o que deve ser ignorado. Se for, não o coloca em cópia.
+            lider_cc_gerente = buscar_cc_viaAtivo(lider_matricula_gerente, ativos_dict)
+            print("Centro de custo gerente: ", lider_cc_gerente)
+            if int(lider_cc_gerente) == 999999999:
+                ignorar_gerente = True
+            
+        except:
+            ignorar_gerente = True
+            print("except ignorar")
+
+        # Encontra o e-mail do gerente no dataframe de e-mails.
+        filtro = df_email.loc[df_email['ID'] == int(lider_id_gerente), 'Email']
    
-        if not filtro.empty:
+        if (not filtro.empty) and (not ignorar_gerente):
             email_gerente = filtro.iloc[0]
         else:
             email_gerente = None
-            
+
     except Exception as e: 
         print("Erro gerente: ", e)
-        pass
-
     
-    # Busca o e-mail do lider
+    # Busca o e-mail do líder direto
     filtro = df_email.loc[df_email['ID'] == int(lider_id), 'Email']
    
     if not filtro.empty:
@@ -247,7 +274,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
 
     # Construir corpo do email apenas com os funcionários desta liderança.
     bodye = construir_email_body_multiplos_funcionarios(
-        periodo=f"11/01 A 03/02",
+        periodo=f"11/02 A 24/02",
         funcionarios=funcionarios_deste_lider
     )
     
@@ -267,7 +294,8 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
             assunto="Relatório de Horas Extras",
             corpo=bodye_inline,
             cc=cc,
-            enviar_automatico=True if lider_id not in lider_manual and not teste else False
+            #enviar_automatico=True if lider_id not in lider_manual and not teste else False
+            enviar_automatico=False
         )
         sucesso = True
         
@@ -285,7 +313,8 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
                     assunto="Relatório de Horas Extras",
                     corpo=bodye_inline,
                     cc=cc,
-                    enviar_automatico=True if lider_id not in lider_manual and not teste else False
+                    #enviar_automatico=True if lider_id not in lider_manual and not teste else False
+                    enviar_automatico=False
                 )
                 
                 sucesso = True
