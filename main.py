@@ -64,7 +64,7 @@ class Funcionario:
 
 #----------------------------------------------------------------------------------------
 
-jsonArq = pathlib.Path(r"reports_fevereiro.json")
+jsonArq = pathlib.Path(r"reports_março.json")
 with open(jsonArq, 'r', encoding='utf-8') as arquivo:
     empregados = json.load(arquivo)
     # Itera sobre cada empregado do arquivo "projetosX.json"
@@ -155,15 +155,11 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
 
 
         # Alterar número mínimo dependendo de quantas semanas faz desde o início do ponto.
-        if total_Extras >= 15:
+        if total_Extras >= 5:
           ops.append(1)
 
         if datas_sem_descanso:
-            ops.append(2)
-
-        if datas_interjor and len(datas_interjor) > 0:
-            ops.append(3)
-        
+            ops.append(2)   
 
         # Gerar email apenas se houver irregularidades
         if ops:
@@ -193,13 +189,13 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                 print("Problema ao processar funcionário: ", funcionario)
             
 # Cria planilha com funcionários que não conseguiram ser processados.
-nome_arquivo_problemas = 'problemas_processamento_' + datetime.now().strftime('%d-%m-%Y %H-%M-%S') + '.xlsx'
-
-try:
-    df_problemas = pd.DataFrame(lista_problemas)
-    df_problemas.to_excel(nome_arquivo_problemas, index=False, engine='openpyxl')
-except Exception as Exception_Planilha:
-    print("Problema com a planilha de erros de processamento: ", Exception_Planilha)
+if not teste:
+    nome_arquivo_problemas = 'problemas_processamento_' + datetime.now().strftime('%d-%m-%Y %H-%M-%S') + '.xlsx'
+    try:
+        df_problemas = pd.DataFrame(lista_problemas)
+        df_problemas.to_excel(nome_arquivo_problemas, index=False, engine='openpyxl')
+    except Exception as Exception_Planilha:
+        print("Problema com a planilha de erros de processamento: ", Exception_Planilha)
 
 # Itera sobre cada liderança para enviar o email.
 enviados = []
@@ -274,7 +270,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
 
     # Construir corpo do email apenas com os funcionários desta liderança.
     bodye = construir_email_body_multiplos_funcionarios(
-        periodo=f"11/02 A 24/02",
+        periodo=f"11/03 A 15/03",
         funcionarios=funcionarios_deste_lider
     )
     
@@ -294,8 +290,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
             assunto="Relatório de Horas Extras",
             corpo=bodye_inline,
             cc=cc,
-            #enviar_automatico=True if lider_id not in lider_manual and not teste else False
-            enviar_automatico=False
+            enviar_automatico=True if lider_id not in lider_manual and not teste else False
         )
         sucesso = True
         
@@ -313,8 +308,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
                     assunto="Relatório de Horas Extras",
                     corpo=bodye_inline,
                     cc=cc,
-                    #enviar_automatico=True if lider_id not in lider_manual and not teste else False
-                    enviar_automatico=False
+                    enviar_automatico=True if lider_id not in lider_manual and not teste else False
                 )
                 
                 sucesso = True

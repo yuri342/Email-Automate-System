@@ -11,7 +11,7 @@ def gerar_funcionario_html(funcionario: object, periodo: str) -> str:
     if 1 in ops:
         HorasPendentes = funcionario.horas_extras
         HorasPendentestrimed = HorasPendentes[:4] if HorasPendentes else ""
-        Fechamento_folha = "10/03/2026"
+        Fechamento_folha = "10/04/2026"
         
         secao_compensacao = f"""
         <div class="situacao-box situacao-interjornada">
