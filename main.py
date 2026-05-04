@@ -64,10 +64,10 @@ class Funcionario:
 
 #----------------------------------------------------------------------------------------
 
-jsonArq = pathlib.Path(r"reports_março.json")
+jsonArq = pathlib.Path(r"reports_abril.json")
 with open(jsonArq, 'r', encoding='utf-8') as arquivo:
     empregados = json.load(arquivo)
-    # Itera sobre cada empregado do arquivo "projetosX.json"
+    # Itera sobre cada empregado do arquivo json
     for empregado in empregados["Empregados"]:
         total_Extras = 0
         datas_interjor = []
@@ -106,9 +106,9 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
                 ultima_hoje = marcas[-1]
                 primeira_amanha = dia_seguinte["marcacoes"][0]
                 interjornada = diferenca_horas(data1=dia["data"], hora1=ultima_hoje, data2=dia_seguinte["data"], hora2=primeira_amanha)
-                # Filtra a interjornada. Ignora quem tiver menos de 1 hora (provavelmente é um dos casos
-                # de bater o ponto 23:59 de um dia e depois 00:01 do outro.)
-                if 1 < interjornada < 11:
+                # Filtra a interjornada. Ignora quem tiver menos de 4 hora (provavelmente é caso de hora extra
+                # sobreaviso ou ponto mal feito.)
+                if 4 < interjornada < 11:
                     datas_interjor.append([dia["data"], dia["dia_semana"], dia["marcacoes"], dia_seguinte["data"],dia_seguinte["dia_semana"], dia_seguinte["marcacoes"], f"{int(interjornada):02d}:{int((interjornada - int(interjornada)) * 60):02d}"])                    
                     
                     # Coloca no manual quem tiver menos de 5 horas de interjornada para evitar erros
@@ -154,16 +154,22 @@ with open(jsonArq, 'r', encoding='utf-8') as arquivo:
             trabalhado_ontem = trabalhado_hoje
 
 
-        # Alterar número mínimo dependendo de quantas semanas faz desde o início do ponto.
-        if total_Extras >= 5:
+        # Alterar número mínimo dependendo de quantas semanas faz desde o início do ponto
+        # Primeira semana do ponto: 5h
+        # Seguda semana do ponto: 10h
+        # Terceira semana do ponto: 15h
+
+        if total_Extras >= 15:
           ops.append(1)
 
         if datas_sem_descanso:
             ops.append(2)   
 
+        if datas_interjor and len(datas_interjor) > 0:
+            ops.append(3)
+
         # Gerar email apenas se houver irregularidades
         if ops:
-
             funcionario = Funcionario(
                 nome=nome,
                 matricula=matricula,
@@ -200,13 +206,17 @@ if not teste:
 # Itera sobre cada liderança para enviar o email.
 enviados = []
 email_gerente = None
+lider_cc = 0
 
 trava = 0
 
 for lider_id, funcionarios_deste_lider in dict_lider.items():
     
+    #if int(lider_id) in (10269206, 10284099, 10401145, 10268542, 10400568, 10401630, 10400845, 10400728, 10268964, 10491648): continue
+
     try:
         # Verifica se o centro de custo da liderança direta é o que deve ser ignorado. Se for, não envia e-mail.
+        lider_cc = 0
         lider_matricula = funcionarios_deste_lider[0].lider_matricula
         lider_cc = buscar_cc_viaAtivo(lider_matricula, ativos_dict)
         print("Centro de custo do líder: ", lider_cc)
@@ -216,7 +226,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
         print(f"Problema no centro de custo, lider_matricula: {lider_matricula}")
 
     # Trava para usar o modo de teste
-    if trava>2 and teste: sys.exit(0)
+    if trava>15 and teste: sys.exit(0)
     trava += 1
 
     email_gerente = None
@@ -228,7 +238,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
         if lider_cargo_gerente.split()[0].casefold() == "GERENTE".casefold():
             raise Exception("Líder direto já é gerente.")
         
-        # Dado que a liderança direta não é gerente, se busca o gerente subindo na hierarquia em loop
+        # Dado que a liderança direta não é gerente, busca o gerente subindo na hierarquia em loop
         lider_matricula_gerente = lider_matricula
         while lider_cargo_gerente.split()[0].casefold() != "GERENTE".casefold():
             id_superior, superior_matricula, superior_nome = buscar_lideranca(lider_matricula_gerente, ativos_dict)
@@ -270,53 +280,72 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
 
     # Construir corpo do email apenas com os funcionários desta liderança.
     bodye = construir_email_body_multiplos_funcionarios(
-        periodo=f"11/03 A 15/03",
+        periodo=f"11/04 A 26/04",
         funcionarios=funcionarios_deste_lider
     )
     
     # Coloca o CSS no formato inline para ser melhor lido pelo Outlook.
     bodye_inline = transform(bodye, disable_validation=True)
 
-    cc = ["maicon.borba@tkelevator.com", "fernanda.barboza@tkelevator.com", "yuri.souza@tkelevator.com"]
+    # Faz a escolha de quem será copiado no e-mail
+    cc = ["maicon.borba@tkelevator.com", "fernanda.barboza@tkelevator.com"]
 
     if email_gerente:
         cc.append(email_gerente)
+    
+    if email_gerente == "marcelo.rosa@tkelevator.com" or email_lider == "marcelo.rosa@tkelevator.com":
+        cc.append("sandra.rocha@tkelevator.com")
+    
+    if lider_cc:
+        if int(lider_cc) > 55043300 and int(lider_cc) < 55043390:
+            cc.append("luciano.mendonca@tkelevator.com")
 
-
+    # Faz o envio do e-mail
     sucesso = False
     try:
-        enviar_email_outlook(
+        foiEnviado = enviar_email_outlook(
             destinatario=email_lider,
             assunto="Relatório de Horas Extras",
             corpo=bodye_inline,
             cc=cc,
             enviar_automatico=True if lider_id not in lider_manual and not teste else False
         )
-        sucesso = True
+
+        if foiEnviado:
+            sucesso = True
+        else:
+            raise Exception()
         
-    except Exception as e:
-        print(f"❌ Falha ao enviar para {funcionarios_deste_lider[0].lider_nome} pelo nome: {e}")
-        sucesso = False
-   
-    # Se houver problema, tenta novamente procurando o email na GAL.
+    except Exception:
+        if len(funcionarios) > 0:
+            print(f"❌ Falha ao enviar para {funcionarios[0].lider_nome} pelo email, será usada a GAL")
+        else:
+            print(f"❌ Falha ao enviar email, será usada a GAL")
+
+        
+    # Se houver problema, tenta novamente procurando o e-mail na GAL.
     if not sucesso:
         email_gal = buscar_email_na_gal(funcionarios_deste_lider[0].lider_nome)
         if email_gal:
             try:
-                enviar_email_outlook(
+                foiEnviado = enviar_email_outlook(
                     destinatario=email_gal,
                     assunto="Relatório de Horas Extras",
                     corpo=bodye_inline,
                     cc=cc,
                     enviar_automatico=True if lider_id not in lider_manual and not teste else False
                 )
+
+                if foiEnviado:
+                    sucesso = True
+                    print("Email enviado pela GAL")
+                else:
+                    raise Exception()
                 
-                sucesso = True
                 print(f"✅ E-mail enviado com sucesso para: {email_gal}")
                 
-            except Exception as e2:
-                print(f"❌ Falha ao enviar para {email_gal}: {e2}")
-
+            except Exception:
+                print(f"❌ Falha ao enviar para {email_gal} pela GAL")
     
     # Registra os funcionários cujo email teve sucesso no envio.
     if sucesso:
@@ -325,7 +354,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
                 nome_funcionario = func.nome
                 enviados.append({"Matricula": func.matricula, "Empregado": nome_funcionario, "Lider": func.lider_nome, "Lider Matricula": func.lider_matricula})
         except:
-            print(f"****Problema em adicionar lider na lista: Líder: {funcionarios_deste_lider[0].lider_nome}****")
+            print(f"****Problema em adicionar lider na lista - Líder: {funcionarios_deste_lider[0].lider_nome}****")
 
 # Adicionar registros na planilha final de enviados.
 nome_arquivo_enviados = "enviados_" + datetime.now().strftime('%d-%m-%Y %H-%M-%S') + '.xlsx'
