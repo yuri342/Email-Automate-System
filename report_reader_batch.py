@@ -3,7 +3,7 @@ import re
 from pathlib import Path as path
 import json
 
-pdf_path = path(r"Relatório 11_04-26_04--2026.PDF")
+pdf_path = path(r"Relatorio extras 11-04_03-05--2026.PDF")
  
 def nao_e_hora(item):
     padrao_hora = r'^\d{3}:\d{2}$' # Exemplo: 123:45

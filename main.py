@@ -226,7 +226,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
         print(f"Problema no centro de custo, lider_matricula: {lider_matricula}")
 
     # Trava para usar o modo de teste
-    if trava>15 and teste: sys.exit(0)
+    if trava>5 and teste: sys.exit(0)
     trava += 1
 
     email_gerente = None
@@ -280,7 +280,7 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
 
     # Construir corpo do email apenas com os funcionários desta liderança.
     bodye = construir_email_body_multiplos_funcionarios(
-        periodo=f"11/04 A 26/04",
+        periodo=f"11/04 A 03/05",
         funcionarios=funcionarios_deste_lider
     )
     
@@ -299,6 +299,8 @@ for lider_id, funcionarios_deste_lider in dict_lider.items():
     if lider_cc:
         if int(lider_cc) > 55043300 and int(lider_cc) < 55043390:
             cc.append("luciano.mendonca@tkelevator.com")
+
+    if int(lider_id) == 10402981: cc.append("jonathan.santos@tkelevator.com")
 
     # Faz o envio do e-mail
     sucesso = False
